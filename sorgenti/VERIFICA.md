@@ -45,3 +45,7 @@ Il difetto è stato riprodotto nella versione 0.2.1: dopo l'importazione si vedo
 Controllati anche: importazione successiva che sostituisce tutti i dati, eliminazione della copia locale tramite Rimuovi dati e torna alla demo, sorgente e nome file visibili, assenza di overflow a 390 × 844 e assenza di errori JavaScript. Nessuna prova su iPhone fisico.
 
 Il workbook reale e i suoi dati non sono inclusi nel pacchetto GitHub. Le precedenti note che dichiarano assenza del file reale riguardano esclusivamente le verifiche storiche delle versioni 0.2.0 e 0.2.1.
+
+## Aggiornamento 0.2.3 — icone ARCHEA
+
+Favicon SVG e ICO, PNG da 16/32/192/512 pixel e icona Apple da 180 pixel aggiornati con scritta ARCHEA bianca su fondo nero. Verificati i collegamenti nell'HTML, le dimensioni del manifest e l'aspetto dell'icona a 512 pixel. Build completata. Le funzioni Excel della versione 0.2.2 restano presenti.
