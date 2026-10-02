@@ -1045,3 +1045,7 @@ h4 {
 .warn-toggle {
   display: block;
 }
+
+.dataset-summary { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 12px 14px; margin-bottom: 20px; background: #f1f4f2; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+.dataset-summary strong { font-weight: 600; }
+.dataset-summary small { flex-basis: 100%; overflow-wrap: anywhere; color: #65716d; font-size: 12px; }

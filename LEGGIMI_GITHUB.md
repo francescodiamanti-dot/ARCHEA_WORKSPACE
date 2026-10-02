@@ -1,23 +1,21 @@
-# ARCHEA WORKSPACE 0.2.1 — correzione importazione Excel
+# ARCHEA WORKSPACE 0.2.2 — dati Excel mantenuti alla riapertura
 
-## Caricamento su GitHub
+## Aggiornamento
 
 1. Estrai lo ZIP sul computer.
-2. Carica il contenuto estratto nella radice della stessa repository: `index.html`, cartelle `assets/` e `icons/`, `manifest.webmanifest` e gli altri file. Sovrascrivi i file con lo stesso nome. Non caricare il solo ZIP e non racchiudere questi file in un'altra cartella.
-3. Mantieni GitHub Pages configurato per pubblicare la radice della repository. L'app è già compilata; non occorre compilare i sorgenti per questo aggiornamento.
-4. Dopo la pubblicazione, riapri l'indirizzo dell'app in Safari e ricarica la pagina. In fondo deve comparire `v0.2.1`. Quindi importa nuovamente l'Excel aggiornato.
+2. Apri la stessa repository GitHub, scegli Add file → Upload files, seleziona tutti i file e le sottocartelle dentro la cartella estratta e trascinali nell'area di caricamento. `index.html` deve essere direttamente nella radice della repository. Conferma con Commit changes.
+3. Mantieni GitHub Pages configurato per pubblicare la radice della repository. L'app è già compilata.
+4. Dopo la pubblicazione, ricarica l'app in Safari e verifica `v0.2.2` in fondo. Importa una volta il tuo Excel aggiornato.
+5. In alto, sotto l'intestazione, verifica Il tuo Excel, il nome del file e i numeri di progetti e progetti attivi. Il badge deve diventare EXCEL STATICO.
 
-Se dalla schermata Home compare ancora la vecchia versione, chiudi l'app, ricarica il sito in Safari e riaprila.
+La copia dell'ultimo Excel ora viene ripristinata alla riapertura nello stesso browser. Per aggiornare i dati importa un nuovo Excel: questo sostituisce i dati precedenti. Il pulsante Rimuovi dati e torna alla demo cancella la copia locale. Se cambi browser, dispositivo o cancelli i dati del sito, serve una nuova importazione. Se il browser non permette il salvataggio, viene mostrata una segnalazione in Persona e dati.
 
-La cartella `sorgenti/` conserva il progetto modificabile. Per sviluppare: entra in questa cartella, esegui `npm ci`, poi `npm run dev`.
+## Verifiche
 
-## Correzioni
+17 test automatici superati. Provata sul browser l'importazione del file reale fornito, il ripristino dopo un ricaricamento e in una nuova scheda, la sostituzione con un nuovo import e il ritorno alla demo. Nessun errore JavaScript e nessun overflow a 390 × 844. Nessuna prova su un iPhone fisico.
 
-- Le schede Excel vengono lette da A1, conservando righe e colonne vuote iniziali.
-- Gli stati progetto vengono cercati in N oppure M, anche oltre la riga 57. La precedenza di N resta compatibile con la versione precedente; eventuali contraddizioni sono segnalate.
-- `Insight Data` e `#InsightData` vengono riconosciuti, così come `Attivo` con spazi, maiuscole o emoji.
-- Quando gli stati non sono disponibili, la schermata propone Mostra tutti i progetti e indica dove consultare le segnalazioni. Nessun progetto viene automaticamente dichiarato attivo senza uno stato riconosciuto.
+## Sorgenti e dati
 
-13 test superati. Nel browser, lo stesso Excel di prova passa da 0 a 5 progetti attivi con la correzione. Il tuo Excel reale non è stato fornito: se il problema persiste dopo aver verificato `v0.2.1`, serve il file per verificarne il layout.
+La cartella sorgenti contiene il progetto modificabile. Per sviluppare entra in sorgenti, esegui npm ci e npm run dev.
 
-L'importazione resta statica e in memoria: dopo un ricaricamento della pagina occorre reimportare l'Excel.
+Il pacchetto non contiene il tuo Excel né i suoi dati. L'app salva soltanto il dataset elaborato nel browser dell'utente, senza inviarlo online. La demo contiene dati fittizi. L'importazione resta statica: non è una connessione live a Google Fogli.

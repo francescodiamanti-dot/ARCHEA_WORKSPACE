@@ -29,7 +29,7 @@ function ProfileDialog() {
     sourceDescription = {
       demo: "Dati dimostrativi fittizi, generati nel layout dei fogli reali. Nessun dato del team.",
       excel:
-        "Importazione statica da file locale. Elaborata solo in questa pagina, non salvata né inviata, e non aggiornata dal Google Fogli.",
+        "Dati importati dal tuo Excel e conservati in questo browser. Non vengono inviati online e non si aggiornano automaticamente da Google Fogli. Importa un nuovo Excel per aggiornarli.",
       live: "Connessione a Google Fogli.",
     }[meta.source];
   return (
@@ -122,7 +122,7 @@ function ProfileDialog() {
           onChange={(g) => {
             var j;
             const x = (j = g.target.files) == null ? void 0 : j[0];
-            (x && importExcel(x).then(close), (g.target.value = ""));
+            (x && importExcel(x).then(success => { if (success) close(); }), (g.target.value = ""));
           }}
         />
       </div>

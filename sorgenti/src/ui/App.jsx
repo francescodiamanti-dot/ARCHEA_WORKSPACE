@@ -69,6 +69,13 @@ function AppLayout() {
             </button>
           </div>
         )}
+        {data && (
+          <div className="dataset-summary" role="status">
+            <strong>{data.meta.source === 'excel' ? 'Il tuo Excel' : 'Dati dimostrativi'}</strong>
+            <span>{data.progetti.length} progetti · {data.progetti.filter(project => project.stato === 'Attivo').length} attivi</span>
+            {data.meta.source === 'excel' && <small>{data.meta.label.replace('Importazione statica: ', '')}</small>}
+          </div>
+        )}
         {loading && !data && <p className="empty">{"Caricamento…"}</p>}
         {data &&
           viewer &&

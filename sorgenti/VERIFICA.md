@@ -35,3 +35,13 @@ Bundle originale conservato in `tests/fixtures/original-bundle.js`, usato soltan
 Browser Chromium 390 × 844, stesso workbook sintetico con intervalli non inizializzati in A1 e stati in M: versione originale 0 progetti attivi; versione 0.2.1 5 progetti attivi. Il selettore Note mantiene i progetti attivi in cima. Nessun errore JavaScript.
 
 L'Excel reale dell'utente non è stato fornito: la prova riproduce i difetti identificati nel codice.
+
+## Correzione 0.2.2 — ultimo Excel e riapertura
+
+17 test automatici superati. Importazione sul browser verificata anche con il workbook reale fornito: 26 progetti, 11 attivi, 24 task, 3 note e 5968 ore complessive. Nessuna commessa della demo viene aggiunta ai progetti importati.
+
+Il difetto è stato riprodotto nella versione 0.2.1: dopo l'importazione si vedono 11 progetti attivi, ma al ricaricamento si torna alla demo con 5. Nella versione 0.2.2 gli 11 progetti attivi restano presenti sia dopo il ricaricamento sia in una nuova scheda dello stesso browser.
+
+Controllati anche: importazione successiva che sostituisce tutti i dati, eliminazione della copia locale tramite Rimuovi dati e torna alla demo, sorgente e nome file visibili, assenza di overflow a 390 × 844 e assenza di errori JavaScript. Nessuna prova su iPhone fisico.
+
+Il workbook reale e i suoi dati non sono inclusi nel pacchetto GitHub. Le precedenti note che dichiarano assenza del file reale riguardano esclusivamente le verifiche storiche delle versioni 0.2.0 e 0.2.1.

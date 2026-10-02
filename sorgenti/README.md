@@ -60,16 +60,18 @@ npm run preview
 - Collegamenti agli allegati e copia dei percorsi server.
 - Manifest, icone e impostazioni di visualizzazione iPhone.
 
-La selezione persona è una simulazione: **non è un login**. I dati Excel restano in memoria nella pagina e si perdono al ricaricamento. Il pulsante Aggiorna non rilegge automaticamente un file Excel dal disco. Google Fogli live, autenticazione, scrittura, notifiche e offline non sono implementati.
+La selezione persona è una simulazione: **non è un login**. L’ultimo dataset importato viene conservato in questo browser e ripristinato alla riapertura. Il pulsante Rimuovi dati e torna alla demo elimina la copia locale. Il pulsante Aggiorna non rilegge automaticamente un file Excel dal disco. Google Fogli live, autenticazione, scrittura, notifiche e offline non sono implementati.
 
 ## Verifiche
 
-13 test automatici: confronto del dataset e delle regole con il bundle originale, stati task, celle ore, date, periodi e totali, progetti e persone escluse, visibilità e importazione di un workbook XLSX sintetico. Il bundle originale è incluso in `tests/fixtures/` esclusivamente come riferimento di regressione; non entra nella build pubblicata.
+17 test automatici: confronto del dataset e delle regole con il bundle originale, stati task, celle ore, date, periodi e totali, progetti e persone escluse, visibilità e importazione di un workbook XLSX sintetico. Il bundle originale è incluso in `tests/fixtures/` esclusivamente come riferimento di regressione; non entra nella build pubblicata.
 
 Vedere `VERIFICA.md` per l'esito delle verifiche sul browser. Nessun confronto con il Google Fogli reale è stato possibile: non è incluso nei file forniti.
 
 ## Prossima fase
 
-Questa consegna ricostruisce la base attuale. Le nuove funzioni non sono ancora state introdotte. Priorità suggerita: connessione ai dati reali, home operativa, scheda progetto completa.
+Questa consegna include anche la persistenza locale dell’ultimo Excel e un riepilogo visibile della sorgente dei dati. Le nuove funzioni non sono ancora state introdotte. Priorità suggerita: connessione ai dati reali, home operativa, scheda progetto completa.
 
 Versione 0.2.1: coordinate Excel conservate da A1, stati in M oppure N su tutte le righe e nomi scheda normalizzati.
+
+Versione 0.2.2: l'importazione sostituisce il dataset precedente, salva solo i dati elaborati nel browser e li ripristina al ricaricamento. Il file Excel originale non viene salvato né inviato. Per avere dati aggiornati occorre reimportare un nuovo Excel. Il browser può rimuovere i dati locali: in quel caso serve reimportare.

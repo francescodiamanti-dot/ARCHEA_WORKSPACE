@@ -1,7 +1,8 @@
-import React from "react";
-import { todayInRome } from "../domain/dates.js";
-import { demoAdapter } from "../data/adapters/demo.js";
-import { importExcel } from "../data/adapters/excel.js";
+import React from 'react';
+import { todayInRome } from '../domain/dates.js';
+import { demoAdapter } from '../data/adapters/demo.js';
+import { importExcel } from '../data/adapters/excel.js';
+import { readSavedExcel, saveExcelSnapshot, removeSavedExcel } from '../data/localSnapshot.js';
 
 const AppContext = React.createContext(null);
 const useApp = () => React.useContext(AppContext);
@@ -10,76 +11,84 @@ function AppProvider({ children }) {
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
-  const [viewerId, setViewerId] = React.useState("fdiamanti");
+  const [viewerId, setViewerId] = React.useState('fdiamanti');
   const [today, setToday] = React.useState(todayInRome());
-  const [tab, setCurrentTab] = React.useState(location.hash.slice(2) || "oggi");
+  const [tab, setCurrentTab] = React.useState(location.hash.slice(2) || 'oggi');
   const [overlay, setOverlay] = React.useState(null);
   const [noteProject, setNoteProject] = React.useState(null);
 
-  const load = React.useCallback(async (loader) => {
+  const load = React.useCallback(async loader => {
     setLoading(true);
     setError(null);
     try {
-      setData(await loader());
+      const nextData = await loader();
+      setData(nextData);
       setToday(todayInRome());
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+      return false;
     } finally {
       setLoading(false);
     }
   }, []);
 
   React.useEffect(() => {
-    load(() => demoAdapter.load());
+    load(async () => {
+      try { return readSavedExcel() ?? await demoAdapter.load(); }
+      catch (err) {
+        const demo = await demoAdapter.load();
+        demo.meta.warnings.push(`Dati locali non disponibili: ${err.message}. Importa nuovamente l'Excel.`);
+        return demo;
+      }
+    });
   }, [load]);
   React.useEffect(() => {
     const onVisible = () => {
-      if (document.visibilityState === "visible") setToday(todayInRome());
+      if (document.visibilityState === 'visible') setToday(todayInRome());
     };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
   React.useEffect(() => {
     const closeOverlay = () => setOverlay(null);
-    window.addEventListener("hashchange", closeOverlay);
-    return () => window.removeEventListener("hashchange", closeOverlay);
+    window.addEventListener('hashchange', closeOverlay);
+    return () => window.removeEventListener('hashchange', closeOverlay);
   }, []);
 
   const viewer = React.useMemo(
-    () =>
-      data?.persone.find((person) => person.id === viewerId) ??
-      data?.persone[0] ??
-      null,
+    () => data?.persone.find(person => person.id === viewerId) ?? data?.persone[0] ?? null,
     [data, viewerId],
   );
   const value = {
-    data,
-    loading,
-    error,
-    viewer,
-    setViewerId,
-    today,
-    tab,
-    overlay,
-    noteProject,
-    setNoteProject,
+    data, loading, error, viewer, setViewerId, today, tab, overlay,
+    noteProject, setNoteProject,
     setTab(nextTab) {
       setCurrentTab(nextTab);
       setOverlay(null);
-      history.replaceState(null, "", `#/${nextTab}`);
+      history.replaceState(null, '', `#/${nextTab}`);
       window.scrollTo(0, 0);
     },
     open: setOverlay,
     close: () => setOverlay(null),
-    // Excel remains a static in-memory snapshot, as in the supplied application.
-    reload: () =>
-      load(() =>
-        !data || data.meta.source === "demo"
-          ? demoAdapter.load()
-          : Promise.resolve(data),
-      ),
-    importExcel: (file) => load(() => importExcel(file)),
-    backToDemo: () => load(() => demoAdapter.load()),
+    reload: () => load(() => !data || data.meta.source === 'demo' ? demoAdapter.load() : Promise.resolve(data)),
+    importExcel: file => load(async () => {
+      const imported = await importExcel(file);
+      try { saveExcelSnapshot(imported); }
+      catch {
+        // Avoid restoring an older import after failing to save the new one.
+        try { removeSavedExcel(); } catch { /* Browser storage is unavailable. */ }
+        imported.meta.warnings.push('Excel importato per questa sessione. Il browser non consente di conservarlo: alla riapertura sarà necessario importarlo di nuovo.');
+      }
+      setNoteProject(null);
+      return imported;
+    }),
+    backToDemo: () => load(async () => {
+      // Switch only after clearing the saved Excel; errors remain visible.
+      removeSavedExcel();
+      setNoteProject(null);
+      return demoAdapter.load();
+    }),
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
