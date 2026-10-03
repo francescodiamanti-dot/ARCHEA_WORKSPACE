@@ -11,7 +11,9 @@ const PENDING_ACCESS_DECISIONS = [
   'Se la colonna "Shared" debba avere un ruolo di autorizzazione (ora: nessuno).',
   "Se i membri possano vedere le task assegnate ad altri (ora: no).",
 ];
-const isManager = (e) => e.ruolo === "responsabile";
+const EDITOR_ROLES = new Set(["senior_architect", "partner_architect"]);
+const isManager = (e) => e.ruolo === "responsabile" || e.ruolo === "partner_architect" || e.appRole === "partner_architect";
+const canEdit = (e) => Boolean(e && EDITOR_ROLES.has(e.appRole ?? e.ruolo));
 function canSeeHours(e, t) {
   return isManager(e) || e.id === t.id || PERMISSIONS.membersSeeOthersHours;
 }
@@ -32,4 +34,5 @@ export {
   visibleTasks,
   visibleProjects,
   visibleNotes,
+  canEdit,
 };

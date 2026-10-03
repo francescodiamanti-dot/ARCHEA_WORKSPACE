@@ -29,7 +29,7 @@ const PERIOD_OPTIONS = [
   ["custom", "Custom"],
 ];
 function HoursScreen() {
-  const { data: data, viewer: viewer, today: today } = useApp(),
+  const { data: data, viewer: viewer, today: today, language } = useApp(),
     [period, setPeriod] = React.useState("settimana"),
     [anchorDate, setAnchorDate] = React.useState(today),
     [customRange, setCustomRange] = React.useState({
@@ -70,11 +70,12 @@ function HoursScreen() {
       [registrations, today],
     );
   if (!data || !viewer) return null;
+  const en = language === 'en';
   if (!selectedPerson)
     return (
       <>
-        <h1 className="big title-row">{"Le mie ore"}</h1>
-        <p className="empty">{"Nessuna ora disponibile per questa persona."}</p>
+        <h1 className="big title-row">{en ? "My hours" : "Le mie ore"}</h1>
+        <p className="empty">{en ? "No hours available for this person." : "Nessuna ora disponibile per questa persona."}</p>
       </>
     );
   const axisMax = chartCeiling(Math.max(0, ...summary.barre.map((S) => S.ore))),
@@ -95,8 +96,8 @@ function HoursScreen() {
     <>
       <h1 className="big title-row">
         {selectedPerson.id === viewer.id
-          ? "Le mie ore"
-          : `Ore · ${selectedPerson.nome.split(" ")[0]}`}
+          ? (en ? "My hours" : "Le mie ore")
+          : `${en ? 'Hours' : 'Ore'} · ${selectedPerson.nome.split(" ")[0]}`}
       </h1>
       <p className="sub">{selectedPerson.nome}</p>
       {isManager(viewer) && people.length > 1 && (
@@ -117,12 +118,12 @@ function HoursScreen() {
         label="Periodo"
         value={period}
         onChange={setPeriod}
-        options={PERIOD_OPTIONS}
+        options={en ? [["giorno","Day"],["settimana","Week"],["mese","Month"],["anno","Year"],["custom","Custom"]] : PERIOD_OPTIONS}
       />
       {period === "custom" ? (
         <div className="range-row">
           <label>
-            {"Dal"}
+            {en ? "From" : "Dal"}
             <input
               type="date"
               value={customRange.from}
@@ -136,7 +137,7 @@ function HoursScreen() {
             />
           </label>
           <label>
-            {"Al"}
+            {en ? "To" : "Al"}
             <input
               type="date"
               value={customRange.to}
@@ -178,7 +179,7 @@ function HoursScreen() {
         </div>
       )}
       {period === "settimana" && (
-        <p className="hint">{"Settimana di calendario, lunedì–domenica."}</p>
+        <p className="hint">{en ? "Calendar week, Monday–Sunday." : "Settimana di calendario, lunedì–domenica."}</p>
       )}
       <div className="total">
         <b>{formatHours(summary.totale)}</b>
@@ -186,10 +187,10 @@ function HoursScreen() {
           {period === "custom"
             ? `Dal ${formatShortDate(range.from)} al ${formatShortDate(range.to)}`
             : {
-                giorno: "In questo giorno",
-                settimana: "Questa settimana",
-                mese: "In questo mese",
-                anno: "In quest’anno",
+                giorno: en ? "This day" : "In questo giorno",
+                settimana: en ? "This week" : "Questa settimana",
+                mese: en ? "This month" : "In questo mese",
+                anno: en ? "This year" : "In quest’anno",
               }[period]}
         </span>
       </div>
@@ -251,7 +252,7 @@ function HoursScreen() {
         </div>
       </div>
       <div className="section-head">
-        <h2>{"Per progetto"}</h2>
+        <h2>{en ? "By project" : "Per progetto"}</h2>
       </div>
       <div className="by-proj">
         {summary.perProgetto.map((S) => (
@@ -272,7 +273,7 @@ function HoursScreen() {
           </div>
         ))}
         {!summary.perProgetto.length && (
-          <p className="empty">{"Nessuna ora registrata nel periodo."}</p>
+          <p className="empty">{en ? "No hours recorded in this period." : "Nessuna ora registrata nel periodo."}</p>
         )}
       </div>
       <button
@@ -286,12 +287,12 @@ function HoursScreen() {
         </span>
         <span>
           <small>
-            {"Oggi · "}
+            {en ? "Today · " : "Oggi · "}
             {formatFullDate(today).replace(/ \d{4}$/, "")}
           </small>
           <b>
             {formatHours(todayHours)}
-            {" registrate"}
+            {en ? " recorded" : " registrate"}
           </b>
         </span>
         <ChevronRightIcon />

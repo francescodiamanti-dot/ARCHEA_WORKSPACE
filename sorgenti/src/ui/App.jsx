@@ -6,6 +6,8 @@ import {
   FolderIcon,
   NoteIcon,
   ClockIcon,
+  HelmetIcon,
+  MoreIcon,
 } from "./components/icons.jsx";
 import { useApp, AppProvider } from "./context.jsx";
 import { SOURCE_LABELS, ProfileDialog } from "./dialogs/Profile.jsx";
@@ -17,11 +19,18 @@ import { HoursScreen } from "./screens/Hours.jsx";
 import { TaskDetail } from "./dialogs/TaskDetail.jsx";
 import { ProjectDetail } from "./dialogs/ProjectDetail.jsx";
 import { NoteDetail } from "./dialogs/NoteDetail.jsx";
+import { SiteScreen } from "./screens/Site.jsx";
+import { CalendarScreen } from "./screens/Calendar.jsx";
+import { BookingsScreen } from "./screens/Bookings.jsx";
+import { InArcheaScreen } from "./screens/InArchea.jsx";
+import { MoreScreen } from "./screens/More.jsx";
 const APP_TABS = [
-  ["oggi", "Oggi", CalendarIcon],
-  ["progetti", "Progetti", FolderIcon],
-  ["note", "Note", () => <NoteIcon />],
-  ["ore", "Ore", ClockIcon],
+  ["oggi", "today", CalendarIcon],
+  ["progetti", "projects", FolderIcon],
+  ["note", "notes", () => <NoteIcon />],
+  ["ore", "hours", ClockIcon],
+  ["cantiere", "site", HelmetIcon],
+  ["altro", "more", MoreIcon],
 ];
 function AppLayout() {
   const {
@@ -34,6 +43,8 @@ function AppLayout() {
     loading: loading,
     error: error,
     reload: reload,
+    t: t,
+    language: language,
   } = useApp();
   return (
     <div className="app">
@@ -71,12 +82,12 @@ function AppLayout() {
         )}
         {data && (
           <div className="dataset-summary" role="status">
-            <strong>{data.meta.source === 'excel' ? 'Il tuo Excel' : 'Dati dimostrativi'}</strong>
-            <span>{data.progetti.length} progetti · {data.progetti.filter(project => project.stato === 'Attivo').length} attivi</span>
+            <strong>{data.meta.source === 'excel' ? t('yourExcel') : t('demoData')}</strong>
+            <span>{data.progetti.length} {t('projects').toLowerCase()} · {data.progetti.filter(project => project.stato === 'Attivo').length} {t('active')}</span>
             {data.meta.source === 'excel' && <small>{data.meta.label.replace('Importazione statica: ', '')}</small>}
           </div>
         )}
-        {loading && !data && <p className="empty">{"Caricamento…"}</p>}
+        {loading && !data && <p className="empty">{t('loading')}</p>}
         {data &&
           viewer &&
           (tab === "oggi" ? (
@@ -85,8 +96,18 @@ function AppLayout() {
             <ProjectsScreen />
           ) : tab === "note" ? (
             <NotesScreen />
-          ) : (
+          ) : tab === "ore" ? (
             <HoursScreen key={viewer.id} />
+          ) : tab === "cantiere" ? (
+            <SiteScreen />
+          ) : tab === "calendario" ? (
+            <CalendarScreen />
+          ) : tab === "prenota" ? (
+            <BookingsScreen />
+          ) : tab === "inarchea" ? (
+            <InArcheaScreen />
+          ) : (
+            <MoreScreen />
           ))}
         {data && (
           <p className="foot">
@@ -94,8 +115,8 @@ function AppLayout() {
             {data.meta.source === "demo"
               ? "Dati dimostrativi"
               : data.meta.label}
-            {" · aggiornati alle "}
-            {new Date(data.meta.loadedAt).toLocaleTimeString("it-IT", {
+            {` · ${t('updated')} `}
+            {new Date(data.meta.loadedAt).toLocaleTimeString(language === 'en' ? "en-GB" : "it-IT", {
               hour: "2-digit",
               minute: "2-digit",
               timeZone: "Europe/Rome",
@@ -107,13 +128,13 @@ function AppLayout() {
       <nav className="tabbar" aria-label="Sezioni">
         {APP_TABS.map(([c, f, v]) => (
           <button
-            className={tab === c ? "on" : ""}
-            aria-current={tab === c ? "page" : void 0}
+            className={tab === c || (c === 'altro' && ['calendario','prenota','inarchea'].includes(tab)) ? "on" : ""}
+            aria-current={tab === c || (c === 'altro' && ['calendario','prenota','inarchea'].includes(tab)) ? "page" : void 0}
             onClick={() => setTab(c)}
             key={c}
           >
             {jsxRuntime.jsx(v, {})}
-            <span>{f}</span>
+            <span>{t(f)}</span>
           </button>
         ))}
       </nav>

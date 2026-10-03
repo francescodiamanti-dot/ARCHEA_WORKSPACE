@@ -44,12 +44,12 @@ function useProjectCounts() {
   }, [e, t, n]);
 }
 function ProjectsScreen() {
-  const { data: data, viewer: viewer, open: open } = useApp(),
+  const { data: data, viewer: viewer, open: open, language } = useApp(),
     [filter, setFilter] = React.useState("attivi"),
     [search, setSearch] = React.useState(""),
     counts = useProjectCounts();
   if (!data || !viewer) return null;
-  const searchKey = normalizeText(search),
+  const en = language === 'en', searchKey = normalizeText(search),
     filteredProjects = visibleProjects(viewer, data.progetti).filter(
       (f) =>
         (filter === "tutti" || f.stato.toLowerCase() === "attivo") &&
@@ -58,19 +58,19 @@ function ProjectsScreen() {
     );
   return (
     <>
-      <h1 className="big title-row">{"Progetti"}</h1>
+      <h1 className="big title-row">{en ? "Projects" : "Progetti"}</h1>
       <SearchBox
         value={search}
         onChange={setSearch}
-        placeholder="Cerca un progetto"
+        placeholder={en ? "Search projects" : "Cerca un progetto"}
       />
       <SegmentedControl
         label="Filtro progetti"
         value={filter}
         onChange={setFilter}
         options={[
-          ["attivi", "Attivi"],
-          ["tutti", "Tutti"],
+          ["attivi", en ? "Active" : "Attivi"],
+          ["tutti", en ? "All" : "Tutti"],
         ]}
       />
       {!isManager(viewer) && (
@@ -109,11 +109,11 @@ function ProjectsScreen() {
                 <span className="pc-meta">
                   <span>
                     <ListIcon /> {v.tasks}
-                    {" task aperte"}
+                    {en ? " open tasks" : " task aperte"}
                   </span>
                   <span>
                     <NoteIcon size={18} /> {v.notes}{" "}
-                    {v.notes === 1 ? "nota" : "note"}
+                    {en ? (v.notes === 1 ? "note" : "notes") : (v.notes === 1 ? "nota" : "note")}
                   </span>
                 </span>
               </span>
@@ -123,9 +123,9 @@ function ProjectsScreen() {
         {!filteredProjects.length && (
           <EmptyState>
             {filter === 'attivi' && !search
-              ? 'Nessun progetto attivo rilevato. Puoi consultare tutti i progetti e verificare le segnalazioni in Persona e dati.'
-              : 'Nessun progetto trovato.'}
-            {filter === 'attivi' && !search && <><br /><button className="link" onClick={() => setFilter('tutti')}>Mostra tutti i progetti</button></>}
+              ? (en ? 'No active project found. You can view all projects and check the data warnings.' : 'Nessun progetto attivo rilevato. Puoi consultare tutti i progetti e verificare le segnalazioni in Persona e dati.')
+              : (en ? 'No project found.' : 'Nessun progetto trovato.')}
+            {filter === 'attivi' && !search && <><br /><button className="link" onClick={() => setFilter('tutti')}>{en ? 'Show all projects' : 'Mostra tutti i progetti'}</button></>}
           </EmptyState>
         )}
       </div>

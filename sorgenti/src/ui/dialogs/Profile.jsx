@@ -2,7 +2,7 @@
 import React from "react";
 import { useApp } from "../context.jsx";
 import { BottomSheet, Avatar } from "../components/common.jsx";
-import { DEMO_ACCOUNTS } from "../../config/accounts.js";
+import { DEMO_ACCOUNTS, ROLES } from "../../config/accounts.js";
 import { RefreshIcon, UploadIcon } from "../components/icons.jsx";
 import { PENDING_ACCESS_DECISIONS } from "../../config/permissions.js";
 const SOURCE_LABELS = {
@@ -21,6 +21,8 @@ function ProfileDialog() {
       backToDemo: backToDemo,
       loading: loading,
       error: error,
+      language: language,
+      setLanguage: setLanguage,
     } = useApp(),
     fileInput = React.useRef(null),
     [showWarnings, setShowWarnings] = React.useState(false);
@@ -50,11 +52,14 @@ function ProfileDialog() {
           >
             <Avatar name={g.nome} size={36} />
             <b>{g.nome}</b>
-            <small>
-              {g.ruolo === "responsabile" ? "Responsabile" : "Membro"}
-            </small>
+            <small>{ROLES[g.appRole]}</small>
           </button>
         ))}
+      </div>
+      <h4>{language === 'en' ? 'Language' : 'Lingua'}</h4>
+      <div className="language-switch compact">
+        <button className={language === 'it' ? 'on' : ''} onClick={() => setLanguage('it')}>Italiano</button>
+        <button className={language === 'en' ? 'on' : ''} onClick={() => setLanguage('en')}>English</button>
       </div>
       <h4>{"Origine dei dati"}</h4>
       <div className="callout">

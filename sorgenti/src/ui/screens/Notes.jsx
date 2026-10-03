@@ -51,6 +51,7 @@ function NotesScreen() {
       viewer: viewer,
       noteProject: noteProject,
       setNoteProject: setNoteProject,
+      language: language,
     } = useApp(),
     [pickerOpen, setPickerOpen] = React.useState(false),
     [search, setSearch] = React.useState(""),
@@ -59,7 +60,7 @@ function NotesScreen() {
       [data, viewer],
     );
   if (!data || !viewer) return null;
-  const notes = visibleNotes(viewer, data.note),
+  const en = language === 'en', notes = visibleNotes(viewer, data.note),
     selectedProject =
       projects.find((j) => j.codice === noteProject) ??
       projects.find((j) => notes.some((p) => p.progettoCodice === j.codice)) ??
@@ -73,7 +74,7 @@ function NotesScreen() {
     noteCount = (j) => notes.filter((p) => p.progettoCodice === j).length;
   return (
     <>
-      <h1 className="big title-row">{"Taccuino"}</h1>
+      <h1 className="big title-row">{en ? "Notes" : "Taccuino"}</h1>
       <button
         className="picker"
         onClick={() => setPickerOpen(true)}
@@ -82,44 +83,44 @@ function NotesScreen() {
         <span>
           {selectedProject
             ? `${selectedProject.codice} · ${selectedProject.nome}`
-            : "Nessun progetto"}
+            : (en ? "No project" : "Nessun progetto")}
         </span>
         <ChevronDownIcon />
       </button>
       <p className="hint">
-        {"Sola lettura: le note si leggono qui, si scrivono nel foglio."}
+        {en ? "Read-only: notes are viewed here and edited in the sheet." : "Sola lettura: le note si leggono qui, si scrivono nel foglio."}
       </p>
       <div className="section-head">
-        <h2>{"Note aperte"}</h2>
+        <h2>{en ? "Open notes" : "Note aperte"}</h2>
       </div>
       <div className="list">
         {openNotes.map((j) => (
           <NoteCard n={j} key={j.id} />
         ))}
         {!openNotes.length && (
-          <EmptyState>{"Nessuna nota aperta per questo progetto."}</EmptyState>
+          <EmptyState>{en ? "No open notes for this project." : "Nessuna nota aperta per questo progetto."}</EmptyState>
         )}
       </div>
       <div className="section-head">
-        <h2>{"Note chiuse"}</h2>
+        <h2>{en ? "Closed notes" : "Note chiuse"}</h2>
       </div>
       <div className="list">
         {closedNotes.map((j) => (
           <NoteCard n={j} key={j.id} />
         ))}
         {!closedNotes.length && (
-          <EmptyState>{"Nessuna nota chiusa."}</EmptyState>
+          <EmptyState>{en ? "No closed notes." : "Nessuna nota chiusa."}</EmptyState>
         )}
       </div>
       {pickerOpen && (
         <BottomSheet
-          title="Scegli progetto"
+          title={en ? "Choose project" : "Scegli progetto"}
           onClose={() => setPickerOpen(false)}
         >
           <SearchBox
             value={search}
             onChange={setSearch}
-            placeholder="Cerca per codice o nome"
+            placeholder={en ? "Search by code or name" : "Cerca per codice o nome"}
           />
           <div className="list tight">
             {projects

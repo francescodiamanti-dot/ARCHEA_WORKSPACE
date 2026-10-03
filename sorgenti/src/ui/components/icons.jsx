@@ -94,6 +94,13 @@ const UploadIcon = () => (
     <path d="M12 16V5M7.500 9.500 12 5l4.500 4.500M5 19h14" />
   </Icon>
 );
+const CameraIcon = () => <Icon><path d="M5 7.5h3l1.5-2h5l1.5 2h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="3.5"/></Icon>;
+const CheckIcon = () => <Icon size={18}><path d="m6.5 12 3.5 3.5 7.5-8"/></Icon>;
+const PlusIcon = () => <Icon><path d="M12 5v14M5 12h14"/></Icon>;
+const HelmetIcon = () => <Icon><path d="M4 15a8 8 0 0 1 16 0M3 15h18M9 7v5M15 7v5"/></Icon>;
+const MoreIcon = () => <Icon><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></Icon>;
+const CarIcon = () => <Icon><path d="m5 16-1-3 2-5h12l2 5-1 3zM7 16v2M17 16v2M7 12h.01M17 12h.01"/></Icon>;
+const CommunityIcon = () => <Icon><circle cx="9" cy="9" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14 16a4 4 0 0 1 6.5 3"/></Icon>;
 function TaskStatusIcon({ s: e }) {
   const t = <circle cx="12" cy="12" r="8.500" />,
     n = {
@@ -148,4 +155,11 @@ export {
   BuildingIcon,
   UploadIcon,
   TaskStatusIcon,
+  CameraIcon,
+  CheckIcon,
+  PlusIcon,
+  HelmetIcon,
+  MoreIcon,
+  CarIcon,
+  CommunityIcon,
 };

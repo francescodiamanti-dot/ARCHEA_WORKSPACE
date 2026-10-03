@@ -24,7 +24,7 @@ function buildDataset(workbook, source, label) {
       warnings,
     ),
     hours = parseHours(findSheet(sheets, SHEET_NAMES.hours), warnings),
-    people = DEMO_ACCOUNTS.map((d) => ({
+    people = DEMO_ACCOUNTS.filter(d => !d.virtual).map(({ appRole, virtual, ...d }) => ({
       ...d,
       inRiepiloghiOre: true,
     })),
@@ -58,7 +58,7 @@ function buildDataset(workbook, source, label) {
       warnings.push(
         `Persone in 04_Ore né principali né nell'elenco esclusioni: ${unrecognized.join(", ")}. Non incluse nei riepiloghi: da confermare.`,
       ));
-  for (const d of DEMO_ACCOUNTS)
+  for (const d of DEMO_ACCOUNTS.filter(d => !d.virtual))
     hours.people.some((m) => normalizeText(m) === normalizeText(d.nome)) ||
       warnings.push(`Persona principale assente da 04_Ore: ${d.nome}.`);
   const listedCodes = new Set(listedProjects.map((d) => d.codice)),

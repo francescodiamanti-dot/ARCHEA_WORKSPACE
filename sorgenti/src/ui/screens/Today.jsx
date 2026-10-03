@@ -24,7 +24,7 @@ const TASK_FILTERS = [
 const INITIAL_TASK_LIMIT = 5;
 function TodayScreen() {
   var selectedPerson;
-  const { data: data, viewer: viewer, today: today } = useApp(),
+  const { data: data, viewer: viewer, today: today, language } = useApp(),
     [filter, setFilter] = React.useState("aperte"),
     [search, setSearch] = React.useState(""),
     [showAll, setShowAll] = React.useState(false),
@@ -40,7 +40,7 @@ function TodayScreen() {
       return E ? w.filter((S) => isAssignedTo(S, E)) : w;
     }, [data, viewer, personFilter, manager]);
   if (!data || !viewer) return null;
-  const statusOf = (w) => taskStatus(w, today),
+  const en = language === 'en', statusOf = (w) => taskStatus(w, today),
     counts = {
       aperte: tasks.filter((w) => isOpenTask(w, today)).length,
       in_scadenza: tasks.filter((w) => statusOf(w) === "in_scadenza").length,
@@ -79,20 +79,20 @@ function TodayScreen() {
     team = data.persone.filter((w) => w.inRiepiloghiOre),
     listTitle =
       personFilter === "me"
-        ? "Le tue task"
+        ? (en ? "Your tasks" : "Le tue task")
         : personFilter === "all"
-          ? "Task del team"
-          : `Task di ${firstName(((selectedPerson = data.persone.find((w) => w.id === personFilter)) == null ? void 0 : selectedPerson.nome) ?? "")}`;
+          ? (en ? "Team tasks" : "Task del team")
+          : `${en ? 'Tasks ·' : 'Task di'} ${firstName(((selectedPerson = data.persone.find((w) => w.id === personFilter)) == null ? void 0 : selectedPerson.nome) ?? "")}`;
   return (
     <>
       <div className="greet">
         <p className="hello">
-          {"Ciao "}
+          {en ? "Hello " : "Ciao "}
           {firstName(viewer.nome)}
         </p>
         <p className="date">{formatToday(today)}</p>
       </div>
-      <h1 className="big">{"Il lavoro di oggi"}</h1>
+      <h1 className="big">{en ? "Today's work" : "Il lavoro di oggi"}</h1>
       <div className="stats">
         <button
           className={`stat neutral${filter === "aperte" ? " on" : ""}`}
@@ -100,7 +100,7 @@ function TodayScreen() {
         >
           <b>{counts.aperte}</b>
           <ListIcon />
-          <span>{"Aperte"}</span>
+          <span>{en ? "Open" : "Aperte"}</span>
         </button>
         <button
           className={`stat warn${filter === "in_scadenza" ? " on" : ""}`}
@@ -108,7 +108,7 @@ function TodayScreen() {
         >
           <b>{counts.in_scadenza}</b>
           <ClockIcon />
-          <span>{"In scadenza"}</span>
+          <span>{en ? "Due soon" : "In scadenza"}</span>
         </button>
         <button
           className={`stat alert${filter === "da_rivedere" ? " on" : ""}`}
@@ -116,21 +116,21 @@ function TodayScreen() {
         >
           <b>{counts.da_rivedere}</b>
           <RefreshIcon />
-          <span>{"Da rivedere"}</span>
+          <span>{en ? "To review" : "Da rivedere"}</span>
         </button>
       </div>
       <div className="section-head">
         <h2>{listTitle}</h2>
         {filteredTasks.length > INITIAL_TASK_LIMIT && !searchKey && (
           <button className="link" onClick={() => setShowAll(!showAll)}>
-            {showAll ? "Mostra meno" : "Vedi tutte"}
+            {showAll ? (en ? "Show less" : "Mostra meno") : (en ? "See all" : "Vedi tutte")}
           </button>
         )}
       </div>
       <SearchBox
         value={search}
         onChange={setSearch}
-        placeholder="Cerca per titolo, progetto o tipologia"
+        placeholder={en ? "Search by title, project or type" : "Cerca per titolo, progetto o tipologia"}
       />
       <div className="chips" role="group" aria-label="Filtri task">
         {TASK_FILTERS.map(([w, E]) => (
@@ -142,7 +142,7 @@ function TodayScreen() {
             }}
             key={w}
           >
-            {E} <i>{counts[w]}</i>
+            {(en ? { aperte:'Open', in_scadenza:'Due soon', scadute:'Overdue', da_rivedere:'To review', validate:'Validated' }[w] : E)} <i>{counts[w]}</i>
           </button>
         ))}
       </div>
@@ -153,22 +153,22 @@ function TodayScreen() {
         {!shownTasks.length && (
           <EmptyState>
             {searchKey
-              ? "Nessuna task corrisponde alla ricerca."
-              : "Nessuna task in questa categoria."}
+              ? (en ? "No task matches your search." : "Nessuna task corrisponde alla ricerca.")
+              : (en ? "No tasks in this category." : "Nessuna task in questa categoria.")}
           </EmptyState>
         )}
       </div>
       {manager && (
         <>
           <div className="section-head">
-            <h2>{"Il team"}</h2>
+            <h2>{en ? "Team" : "Il team"}</h2>
           </div>
           <div className="team">
             <button
               className={`chip${personFilter === "me" ? " on" : ""}`}
               onClick={() => setPersonFilter("me")}
             >
-              {"Mie"}
+              {en ? "Mine" : "Mie"}
             </button>
             {team
               .filter((w) => w.id !== viewer.id)
@@ -188,7 +188,7 @@ function TodayScreen() {
               className={`chip${personFilter === "all" ? " on" : ""}`}
               onClick={() => setPersonFilter("all")}
             >
-              {"Tutti"}
+              {en ? "All" : "Tutti"}
             </button>
           </div>
         </>
