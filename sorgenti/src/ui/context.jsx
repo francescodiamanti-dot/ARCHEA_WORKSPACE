@@ -18,6 +18,7 @@ function AppProvider({ children }) {
   const [tab, setCurrentTab] = React.useState(location.hash.slice(2) || 'oggi');
   const [overlay, setOverlay] = React.useState(null);
   const [noteProject, setNoteProject] = React.useState(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = React.useState('fdiamanti');
   const [language, setLanguageState] = React.useState(() => localStorage.getItem('archea-language') || 'it');
 
   const load = React.useCallback(async loader => {
@@ -74,7 +75,7 @@ function AppProvider({ children }) {
   };
   const value = {
     data, loading, error, viewer, setViewerId, today, tab, overlay,
-    noteProject, setNoteProject, language, setLanguage,
+    noteProject, setNoteProject, selectedEmployeeId, setSelectedEmployeeId, language, setLanguage,
     t: key => translate(language, key),
     setTab(nextTab) {
       setCurrentTab(nextTab);

@@ -14,6 +14,8 @@ const PENDING_ACCESS_DECISIONS = [
 const EDITOR_ROLES = new Set(["senior_architect", "partner_architect"]);
 const isManager = (e) => e.ruolo === "responsabile" || e.ruolo === "partner_architect" || e.appRole === "partner_architect";
 const canEdit = (e) => Boolean(e && EDITOR_ROLES.has(e.appRole ?? e.ruolo));
+const canViewAccounting = (e) => Boolean(e && [...EDITOR_ROLES, "property"].includes(e.appRole ?? e.ruolo));
+const isProperty = (e) => Boolean(e && (e.appRole ?? e.ruolo) === "property");
 function canSeeHours(e, t) {
   return isManager(e) || e.id === t.id || PERMISSIONS.membersSeeOthersHours;
 }
@@ -35,4 +37,6 @@ export {
   visibleProjects,
   visibleNotes,
   canEdit,
+  canViewAccounting,
+  isProperty,
 };

@@ -8,6 +8,8 @@ import {
   ClockIcon,
   HelmetIcon,
   MoreIcon,
+  EuroIcon,
+  IdentityIcon,
 } from "./components/icons.jsx";
 import { useApp, AppProvider } from "./context.jsx";
 import { SOURCE_LABELS, ProfileDialog } from "./dialogs/Profile.jsx";
@@ -25,6 +27,8 @@ import { BookingsScreen } from "./screens/Bookings.jsx";
 import { InArcheaScreen } from "./screens/InArchea.jsx";
 import { MoreScreen } from "./screens/More.jsx";
 import { AccountingScreen } from "./screens/Accounting.jsx";
+import { ProjectProgressScreen } from "./screens/ProjectProgress.jsx";
+import { EmployeeBioScreen } from "./screens/EmployeeBio.jsx";
 const APP_TABS = [
   ["oggi", "today", CalendarIcon],
   ["progetti", "projects", FolderIcon],
@@ -32,6 +36,11 @@ const APP_TABS = [
   ["ore", "hours", ClockIcon],
   ["cantiere", "site", HelmetIcon],
   ["altro", "more", MoreIcon],
+];
+const PROPERTY_TABS = [
+  ["avanzamento", "progress", FolderIcon],
+  ["contabilita", "accounting", EuroIcon],
+  ["bio", "employeeBio", IdentityIcon],
 ];
 function AppLayout() {
   const {
@@ -47,6 +56,12 @@ function AppLayout() {
     t: t,
     language: language,
   } = useApp();
+  const propertyMode = viewer?.appRole === 'property';
+  const propertySections = ['avanzamento','contabilita','bio'];
+  const effectiveTab = propertyMode
+    ? (propertySections.includes(tab) ? tab : 'avanzamento')
+    : (propertySections.includes(tab) && tab !== 'contabilita' ? 'oggi' : tab);
+  const navigationTabs = propertyMode ? PROPERTY_TABS : APP_TABS;
   return (
     <div className="app">
       <header className="top">
@@ -84,24 +99,28 @@ function AppLayout() {
         {loading && !data && <p className="empty">{t('loading')}</p>}
         {data &&
           viewer &&
-          (tab === "oggi" ? (
+          (effectiveTab === "oggi" ? (
             <TodayScreen key={viewer.id} />
-          ) : tab === "progetti" ? (
+          ) : effectiveTab === "progetti" ? (
             <ProjectsScreen />
-          ) : tab === "note" ? (
+          ) : effectiveTab === "note" ? (
             <NotesScreen />
-          ) : tab === "ore" ? (
+          ) : effectiveTab === "ore" ? (
             <HoursScreen key={viewer.id} />
-          ) : tab === "cantiere" ? (
+          ) : effectiveTab === "cantiere" ? (
             <SiteScreen />
-          ) : tab === "calendario" ? (
+          ) : effectiveTab === "calendario" ? (
             <CalendarScreen />
-          ) : tab === "prenota" ? (
+          ) : effectiveTab === "prenota" ? (
             <BookingsScreen />
-          ) : tab === "inarchea" ? (
+          ) : effectiveTab === "inarchea" ? (
             <InArcheaScreen />
-          ) : tab === "contabilita" ? (
+          ) : effectiveTab === "contabilita" ? (
             <AccountingScreen />
+          ) : effectiveTab === "avanzamento" ? (
+            <ProjectProgressScreen />
+          ) : effectiveTab === "bio" ? (
+            <EmployeeBioScreen />
           ) : (
             <MoreScreen />
           ))}
@@ -129,10 +148,10 @@ function AppLayout() {
         )}
       </main>
       <nav className="tabbar" aria-label="Sezioni">
-        {APP_TABS.map(([c, f, v]) => (
+        {navigationTabs.map(([c, f, v]) => (
           <button
-            className={tab === c || (c === 'altro' && ['calendario','prenota','inarchea','contabilita'].includes(tab)) ? "on" : ""}
-            aria-current={tab === c || (c === 'altro' && ['calendario','prenota','inarchea','contabilita'].includes(tab)) ? "page" : void 0}
+            className={effectiveTab === c || (c === 'altro' && ['calendario','prenota','inarchea','contabilita'].includes(effectiveTab)) ? "on" : ""}
+            aria-current={effectiveTab === c || (c === 'altro' && ['calendario','prenota','inarchea','contabilita'].includes(effectiveTab)) ? "page" : void 0}
             onClick={() => setTab(c)}
             key={c}
           >
@@ -163,4 +182,4 @@ function App() {
     </AppProvider>
   );
 }
-export { APP_TABS, AppLayout, App };
+export { APP_TABS, PROPERTY_TABS, AppLayout, App };

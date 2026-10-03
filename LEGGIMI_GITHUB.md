@@ -1,25 +1,26 @@
-# ARCHEA WORKSPACE · aggiornamento incrementale v0.3.1
+# ARCHEA WORKSPACE · aggiornamento incrementale v0.4.0
 
-Contiene soltanto file nuovi o modificati rispetto alla v0.3.0.
+Contiene soltanto file nuovi o modificati rispetto alla v0.3.1.
 
-## Come caricarlo
+## Caricamento corretto su GitHub
 
 1. Estrai lo ZIP.
-2. Entra nella cartella `ARCHEA_WORKSPACE_UPDATE_v031`.
-3. Seleziona tutto il contenuto della cartella.
-4. Nella radice della repository GitHub scegli **Add file → Upload files**.
-5. Trascina i file e conferma **Commit changes**.
+2. **Entra** nella cartella `ARCHEA_WORKSPACE_UPDATE_v040`.
+3. Seleziona tutto ciò che si trova dentro: `index.html`, `assets`, `sorgenti` e questo file.
+4. Nella pagina principale della repository seleziona **Add file → Upload files**.
+5. Trascina la selezione e conferma **Commit changes**.
 
-Non eliminare gli altri file già presenti nella repository. I vecchi file JavaScript e CSS dentro `assets` possono rimanere: il nuovo `index.html` utilizza automaticamente quelli della v0.3.1.
+Non trascinare la cartella esterna: `index.html` deve sostituire quello presente direttamente nella radice della repository. Non eliminare gli altri file già presenti. A pubblicazione completata, nell'app deve comparire **v0.4.0**.
 
 ## Novità
 
-- Contabilità visibile soltanto a Senior Architect e Partner Architect;
-- selezione di tutti i progetti attivi;
-- contratto firmato e dati cliente;
-- scadenziario con pagato, parziale e residuo;
-- valore commessa, costi consulenti, ore del progetto a 10 €/h, spese totali e guadagno previsto;
-- saldo di cassa calcolato sugli incassi;
-- riepilogo Excel spostato in fondo alle pagine.
+- Contabilità accessibile a Senior Architect, Partner Architect e Property;
+- Architect escluso dalla Contabilità;
+- navigazione Property limitata a Progetti, Contabilità e Bio;
+- sei studi: Firenze, Roma, Milano, Genova, Rio de Janeiro e Tirana;
+- percorso Studi → stato → progetto → gruppi per studio → componenti;
+- ore complessive per progetto e gruppo;
+- apertura diretta della bio dal componente;
+- bio con anni in Archea, ruolo, contratto PDF, compenso annuo e scadenza.
 
-Gli importi contabili inclusi sono dimostrativi. I progetti non configurati mostrano campi vuoti senza generare valori inventati. I documenti reali e la modifica persistente richiederanno il collegamento alla sorgente Google Workspace.
+La mappatura organizzativa è dimostrativa. Le ore sono lette dall'Excel importato; dati HR, contratti e compensi restano vuoti finché non vengono collegati a una fonte protetta.

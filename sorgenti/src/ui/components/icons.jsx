@@ -103,6 +103,7 @@ const CarIcon = () => <Icon><path d="m5 16-1-3 2-5h12l2 5-1 3zM7 16v2M17 16v2M7 
 const CommunityIcon = () => <Icon><circle cx="9" cy="9" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14 16a4 4 0 0 1 6.5 3"/></Icon>;
 const EuroIcon = () => <Icon><path d="M18 6.5A7 7 0 1 0 18 17.5M5 10h9M5 14h8"/></Icon>;
 const FileIcon = () => <Icon><path d="M7 3.5h7l4 4V20H7zM14 3.5V8h4M10 12h5M10 15.5h5"/></Icon>;
+const IdentityIcon = () => <Icon><circle cx="12" cy="8" r="3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0M4 4h16v16H4z"/></Icon>;
 function TaskStatusIcon({ s: e }) {
   const t = <circle cx="12" cy="12" r="8.500" />,
     n = {
@@ -166,4 +167,5 @@ export {
   CommunityIcon,
   EuroIcon,
   FileIcon,
+  IdentityIcon,
 };

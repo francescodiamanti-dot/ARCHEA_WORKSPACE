@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context.jsx';
-import { canEdit } from '../../config/permissions.js';
+import { canEdit, canViewAccounting } from '../../config/permissions.js';
 import { accountingFor } from '../../data/accounting.js';
 import { FileIcon, PlusIcon } from '../components/icons.jsx';
 
@@ -15,7 +15,7 @@ function AccountingScreen() {
   const [projectCode, setProjectCode] = React.useState(activeProjects[0]?.codice || '');
   const project = activeProjects.find(item => item.codice === projectCode) ?? activeProjects[0];
   const [records, setRecords] = React.useState({});
-  if (!canEdit(viewer)) return <div className="access-denied"><h1>{en ? 'Restricted area' : 'Area riservata'}</h1><p>{en ? 'Accounting is available to Senior Architects and Partner Architects.' : 'La contabilità è disponibile da Senior Architect in su.'}</p></div>;
+  if (!canViewAccounting(viewer)) return <div className="access-denied"><h1>{en ? 'Restricted area' : 'Area riservata'}</h1><p>{en ? 'Accounting is available to Senior Architects, Partner Architects and Property.' : 'La contabilità è disponibile per Senior Architect, Partner Architect e Property.'}</p></div>;
   if (!project) return <p className="empty">{en ? 'No active project.' : 'Nessun progetto attivo.'}</p>;
   const accounting = records[project.codice] ?? accountingFor(project.codice);
   const formatMoney = value => new Intl.NumberFormat(en ? 'en-GB' : 'it-IT', { style:'currency', currency:'EUR', maximumFractionDigits:0 }).format(value);
@@ -39,7 +39,7 @@ function AccountingScreen() {
     <div className="account-kpis"><div><small>{en ? 'Collected' : 'Incassato'}</small><b>{formatMoney(paid)}</b></div><div><small>{en ? 'To collect' : 'Da incassare'}</small><b>{formatMoney(receivable)}</b></div><div><small>{en ? 'Expected margin' : 'Margine previsto'}</small><b className={expectedProfit < 0 ? 'negative' : ''}>{formatMoney(expectedProfit)}</b></div></div>
     <div className="section-head"><h2>{en ? 'Contract and client' : 'Contratto e cliente'}</h2></div>
     <article className="contract-card"><div className="contract-file"><span><FileIcon /></span><div><b>{accounting.contract.fileName}</b><small>{accounting.contract.signedAt ? `${en ? 'Signed' : 'Firmato'} ${isoDate(accounting.contract.signedAt)}` : (en ? 'Contract not uploaded' : 'Contratto non caricato')}</small></div><button>{en ? 'Open' : 'Apri'}</button></div><dl><div><dt>{en ? 'Client' : 'Cliente'}</dt><dd>{accounting.client.name}</dd></div><div><dt>{en ? 'VAT no.' : 'P. IVA'}</dt><dd>{accounting.client.vat}</dd></div><div><dt>Email</dt><dd>{accounting.client.contact}</dd></div><div><dt>{en ? 'Address' : 'Sede'}</dt><dd>{accounting.client.address}</dd></div></dl></article>
-    <div className="section-head"><h2>{en ? 'Payment schedule' : 'Scadenziario pagamenti'}</h2><button className="link inline-add" onClick={addPayment}><PlusIcon />{en ? 'Add' : 'Aggiungi'}</button></div>
+    <div className="section-head"><h2>{en ? 'Payment schedule' : 'Scadenziario pagamenti'}</h2>{canEdit(viewer)&&<button className="link inline-add" onClick={addPayment}><PlusIcon />{en ? 'Add' : 'Aggiungi'}</button>}</div>
     <div className="payment-list">{accounting.payments.map(payment => { const status=paymentStatus(payment); const missing=Math.max(0,payment.expected-payment.paid); return <article className="payment-row" key={payment.id}><div className="payment-main"><span><b>{payment.label}</b><small>{en ? 'Due' : 'Scadenza'} · {isoDate(payment.dueAt)}</small></span><span className={`payment-status ${status}`}>{status === 'complete' ? (en?'Paid':'Pagato') : status === 'partial' ? (en?'Partial':'Parziale') : (en?'Due':'Da pagare')}</span></div><div className="payment-values"><span><small>{en?'Amount':'Importo'}</small><b>{formatMoney(payment.expected)}</b></span><span><small>{en?'Paid':'Pagato'}</small><b>{formatMoney(payment.paid)}</b></span><span><small>{en?'Missing':'Manca'}</small><b>{formatMoney(missing)}</b></span></div>{payment.paidAt && <small className="paid-date">{en?'Payment date':'Data pagamento'} · {isoDate(payment.paidAt)}</small>}</article>; })}{!accounting.payments.length && <p className="empty">{en ? 'No payment schedule entered.' : 'Nessuna scadenza inserita.'}</p>}</div>
     <div className="section-head"><h2>{en ? 'Costs and resources' : 'Costi e risorse'}</h2></div>
     <div className="cost-list"><div><span>{en ? 'Consultants and external expenses' : 'Consulenti e spese esterne'}</span><b>{formatMoney(accounting.consultantExpenses)}</b></div>{accounting.expenses.map(expense => <div className="cost-detail" key={expense.label}><span>{expense.label}</span><b>{formatMoney(expense.amount)}</b></div>)}<div><span>{en ? 'Team hours' : 'Ore lavorate dalle risorse'}<small>{projectHours.toLocaleString(en?'en-GB':'it-IT',{maximumFractionDigits:1})} h × {formatMoney(HOURLY_COST)}/h</small></span><b>{formatMoney(hoursCost)}</b></div></div>

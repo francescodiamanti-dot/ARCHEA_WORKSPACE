@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canEdit, isManager } from '../src/config/permissions.js';
+import { canEdit, canViewAccounting, isManager, isProperty } from '../src/config/permissions.js';
 import { translate } from '../src/i18n.js';
 import { HOURLY_COST, paymentStatus } from '../src/ui/screens/Accounting.jsx';
 describe('Ruoli e lingua', () => {
@@ -9,6 +9,13 @@ describe('Ruoli e lingua', () => {
     expect(canEdit({ appRole: 'senior_architect' })).toBe(true);
     expect(canEdit({ appRole: 'partner_architect' })).toBe(true);
     expect(isManager({ appRole: 'partner_architect' })).toBe(true);
+  });
+  it('rende la contabilità visibile a Senior, Partner e Property', () => {
+    expect(canViewAccounting({ appRole:'architect' })).toBe(false);
+    expect(canViewAccounting({ appRole:'senior_architect' })).toBe(true);
+    expect(canViewAccounting({ appRole:'partner_architect' })).toBe(true);
+    expect(canViewAccounting({ appRole:'property' })).toBe(true);
+    expect(isProperty({ appRole:'property' })).toBe(true);
   });
   it('traduce le sezioni principali', () => {
     expect(translate('it', 'site')).toBe('Cantiere');

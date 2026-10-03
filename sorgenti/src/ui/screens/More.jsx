@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context.jsx';
 import { CalendarIcon, CarIcon, CommunityIcon, NoteIcon, ChevronRightIcon, EuroIcon } from '../components/icons.jsx';
-import { canEdit } from '../../config/permissions.js';
+import { canViewAccounting } from '../../config/permissions.js';
 function MoreScreen() {
   const { setTab, language, setLanguage, viewer } = useApp(); const en = language === 'en';
   const items = [
@@ -10,7 +10,7 @@ function MoreScreen() {
     ['prenota', en ? 'Bookings' : 'Prenotazioni', en ? 'Cars, equipment and rooms' : 'Auto, materiale e sale', CarIcon],
     ['inarchea', 'IN ARCHEA', en ? 'Report, events and polls' : 'Report, eventi e sondaggi', CommunityIcon],
   ];
-  if (canEdit(viewer)) items.push(['contabilita', en ? 'Accounting' : 'Contabilità', en ? 'Contracts, payments and margins' : 'Contratti, pagamenti e margini', EuroIcon]);
+  if (canViewAccounting(viewer)) items.push(['contabilita', en ? 'Accounting' : 'Contabilità', en ? 'Contracts, payments and margins' : 'Contratti, pagamenti e margini', EuroIcon]);
   return <><h1 className="big title-row">{en ? 'More' : 'Altro'}</h1><p className="sub">{en ? 'Studio tools and community' : 'Strumenti e community dello studio'}</p><div className="menu-list">{items.map(([id,title,subtitle,Icon]) => <button onClick={() => setTab(id)} key={id}><span className="menu-icon"><Icon /></span><span><b>{title}</b><small>{subtitle}</small></span><ChevronRightIcon /></button>)}</div><div className="section-head"><h2>{en ? 'Language' : 'Lingua'}</h2></div><div className="language-switch"><button className={language === 'it' ? 'on' : ''} onClick={() => setLanguage('it')}>Italiano</button><button className={language === 'en' ? 'on' : ''} onClick={() => setLanguage('en')}>English</button></div></>;
 }
 export { MoreScreen };
