@@ -1,26 +1,26 @@
-# ARCHEA WORKSPACE · aggiornamento incrementale v0.4.0
+# ARCHEA WORKSPACE · aggiornamento incrementale v0.4.1
 
-Contiene soltanto file nuovi o modificati rispetto alla v0.3.1.
+Contiene soltanto file nuovi o modificati rispetto alla v0.4.0.
 
-## Caricamento corretto su GitHub
+## Caricamento corretto
 
 1. Estrai lo ZIP.
-2. **Entra** nella cartella `ARCHEA_WORKSPACE_UPDATE_v040`.
-3. Seleziona tutto ciò che si trova dentro: `index.html`, `assets`, `sorgenti` e questo file.
-4. Nella pagina principale della repository seleziona **Add file → Upload files**.
+2. Entra nella cartella `ARCHEA_WORKSPACE_UPDATE_v041`.
+3. Seleziona tutto il contenuto interno.
+4. Nella radice della repository GitHub scegli **Add file → Upload files**.
 5. Trascina la selezione e conferma **Commit changes**.
 
-Non trascinare la cartella esterna: `index.html` deve sostituire quello presente direttamente nella radice della repository. Non eliminare gli altri file già presenti. A pubblicazione completata, nell'app deve comparire **v0.4.0**.
+Non caricare la cartella esterna: `index.html` deve sostituire quello nella radice della repository. La v0.4.0 deve essere già presente. Al termine, nell'app deve comparire **v0.4.1**.
 
 ## Novità
 
-- Contabilità accessibile a Senior Architect, Partner Architect e Property;
-- Architect escluso dalla Contabilità;
-- navigazione Property limitata a Progetti, Contabilità e Bio;
-- sei studi: Firenze, Roma, Milano, Genova, Rio de Janeiro e Tirana;
-- percorso Studi → stato → progetto → gruppi per studio → componenti;
-- ore complessive per progetto e gruppo;
-- apertura diretta della bio dal componente;
-- bio con anni in Archea, ruolo, contratto PDF, compenso annuo e scadenza.
+- contabilità completa visibile anche nel dettaglio di ogni progetto Property;
+- sezione Contabilità Property aggregata per studio;
+- fatturato, incassi, costi e guadagno complessivi di ogni studio;
+- dettaglio del contributo contabile dei singoli progetti;
+- filtro Bio per Architect, Senior Architect e Partner Architect;
+- progetti seguiti nelle bio di Senior e Partner;
+- gruppi ordinati per ruolo con Partner e Senior per primi;
+- dicitura **Referente:** davanti ai capi progetto.
 
-La mappatura organizzativa è dimostrativa. Le ore sono lette dall'Excel importato; dati HR, contratti e compensi restano vuoti finché non vengono collegati a una fonte protetta.
+Gli importi contabili e la struttura organizzativa restano dimostrativi finché non vengono collegati alle fonti reali protette.
