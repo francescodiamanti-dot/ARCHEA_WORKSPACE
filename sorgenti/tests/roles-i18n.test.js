@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { canEdit, isManager } from '../src/config/permissions.js';
 import { translate } from '../src/i18n.js';
+import { HOURLY_COST, paymentStatus } from '../src/ui/screens/Accounting.jsx';
 describe('Ruoli e lingua', () => {
   it('consente le modifiche da Senior Architect in su', () => {
     expect(canEdit({ appRole: 'architect' })).toBe(false);
@@ -13,5 +14,11 @@ describe('Ruoli e lingua', () => {
     expect(translate('it', 'site')).toBe('Cantiere');
     expect(translate('en', 'site')).toBe('Site');
     expect(translate('en', 'bookings')).toBe('Book');
+  });
+  it('calcola lo stato dei pagamenti e usa il costo orario concordato', () => {
+    expect(HOURLY_COST).toBe(10);
+    expect(paymentStatus({ expected: 30000, paid: 30000 })).toBe('complete');
+    expect(paymentStatus({ expected: 40000, paid: 20000 })).toBe('partial');
+    expect(paymentStatus({ expected: 30000, paid: 0 })).toBe('pending');
   });
 });

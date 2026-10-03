@@ -24,6 +24,7 @@ import { CalendarScreen } from "./screens/Calendar.jsx";
 import { BookingsScreen } from "./screens/Bookings.jsx";
 import { InArcheaScreen } from "./screens/InArchea.jsx";
 import { MoreScreen } from "./screens/More.jsx";
+import { AccountingScreen } from "./screens/Accounting.jsx";
 const APP_TABS = [
   ["oggi", "today", CalendarIcon],
   ["progetti", "projects", FolderIcon],
@@ -80,13 +81,6 @@ function AppLayout() {
             </button>
           </div>
         )}
-        {data && (
-          <div className="dataset-summary" role="status">
-            <strong>{data.meta.source === 'excel' ? t('yourExcel') : t('demoData')}</strong>
-            <span>{data.progetti.length} {t('projects').toLowerCase()} · {data.progetti.filter(project => project.stato === 'Attivo').length} {t('active')}</span>
-            {data.meta.source === 'excel' && <small>{data.meta.label.replace('Importazione statica: ', '')}</small>}
-          </div>
-        )}
         {loading && !data && <p className="empty">{t('loading')}</p>}
         {data &&
           viewer &&
@@ -106,9 +100,18 @@ function AppLayout() {
             <BookingsScreen />
           ) : tab === "inarchea" ? (
             <InArcheaScreen />
+          ) : tab === "contabilita" ? (
+            <AccountingScreen />
           ) : (
             <MoreScreen />
           ))}
+        {data && (
+          <div className="dataset-summary dataset-summary-bottom" role="status">
+            <strong>{data.meta.source === 'excel' ? t('yourExcel') : t('demoData')}</strong>
+            <span>{data.progetti.length} {t('projects').toLowerCase()} · {data.progetti.filter(project => project.stato === 'Attivo').length} {t('active')}</span>
+            {data.meta.source === 'excel' && <small>{data.meta.label.replace('Importazione statica: ', '')}</small>}
+          </div>
+        )}
         {data && (
           <p className="foot">
             {`v${APP_VERSION} · `}
@@ -128,8 +131,8 @@ function AppLayout() {
       <nav className="tabbar" aria-label="Sezioni">
         {APP_TABS.map(([c, f, v]) => (
           <button
-            className={tab === c || (c === 'altro' && ['calendario','prenota','inarchea'].includes(tab)) ? "on" : ""}
-            aria-current={tab === c || (c === 'altro' && ['calendario','prenota','inarchea'].includes(tab)) ? "page" : void 0}
+            className={tab === c || (c === 'altro' && ['calendario','prenota','inarchea','contabilita'].includes(tab)) ? "on" : ""}
+            aria-current={tab === c || (c === 'altro' && ['calendario','prenota','inarchea','contabilita'].includes(tab)) ? "page" : void 0}
             onClick={() => setTab(c)}
             key={c}
           >
