@@ -1,13 +1,13 @@
 {
   "name": "Archea Workspace",
   "short_name": "Archea",
-  "description": "Task, progetti, note e ore. Sempre con te.",
+  "description": "Workspace dimostrativa installabile per task, progetti, ore e attività ARCHEA.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#222624",
   "lang": "it",
   "icons": [
     {
