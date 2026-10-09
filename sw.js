@@ -1,4 +1,4 @@
-const CACHE_NAME = 'archea-workspace-v0.9.3-facebook-nav-test';
+const CACHE_NAME = 'archea-workspace-v0.9.4-pill-motion-notifications';
 const APP_SHELL = ['./'];
 
 self.addEventListener('install', event => {
