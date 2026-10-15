@@ -1,4 +1,4 @@
-const CACHE_NAME = 'archea-workspace-v0.10.7';
+const CACHE_NAME = 'archea-workspace-v0.10.8';
 const APP_SHELL = ['./'];
 
 self.addEventListener('install', event => {
