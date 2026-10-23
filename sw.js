@@ -1,5 +1,5 @@
-const CACHE_NAME = 'archea-workspace-v0.10.14';
-const APP_SHELL = ['./'];
+const CACHE_NAME = 'archea-workspace-v0.12.1';
+const APP_SHELL = ['./', './planning-suite.js?v=0.12.1', './planning-suite.css?v=0.12.1'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));

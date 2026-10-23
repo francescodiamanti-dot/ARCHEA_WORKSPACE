@@ -1,7 +1,7 @@
 {
   "name": "Archea Workspace",
   "short_name": "Archea",
-  "description": "Workspace dimostrativa installabile per task, progetti, ore e attività ARCHEA.",
+  "description": "Workspace dimostrativa installabile per portfolio, pianificazione, task, risorse, ore e attività ARCHEA.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
