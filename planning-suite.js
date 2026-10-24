@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'archea-planning-suite-v2';
-const VERSION = '0.12.1';
+const VERSION = '0.12.2';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 
@@ -255,25 +255,52 @@ function navIcon(name) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.plan}</svg>`;
 }
 
+function allowedPlanningTabs() {
+  return {
+    resource:[],
+    project_manager:['dashboard','plan','resources','timesheets','baseline','finance','portfolio','share'],
+    resource_manager:['dashboard','resources','timesheets','portfolio'],
+    pmo_admin:['dashboard','plan','resources','timesheets','baseline','portfolio','admin','share'],
+    finance_direction:['dashboard','portfolio','finance'],
+    client:['dashboard','plan'],
+    platform_owner:['dashboard','plan','resources','timesheets','baseline','portfolio','finance','admin','users','share'],
+  }[profile()] || [];
+}
+
+const planningTabs = () => [
+  ['dashboard','dashboard','Quadro generale'],['plan','gantt','Piano di progetto'],['resources','resources','Risorse e capacità'],['timesheets','timesheets','Ore e consuntivi'],['baseline','baseline','Baseline'],['portfolio','portfolio','Portfolio'],['finance','finance','Economia'],['admin','admin','PMO e standard'],['users','users','Utenti e permessi'],['share','share','Condivisione'],
+];
+
 function ensureShell() {
   if (document.querySelector('#archea-planning-suite')) return;
   const root = document.createElement('div');
   root.id = 'archea-planning-suite';
   root.className = 'aps';
   root.hidden = true;
-  root.innerHTML = `<div class="aps-shell"><aside class="aps-nav"><div class="aps-wordmark"><img src="./icons/archea-associati-logo.svg" alt="ARCHEA ASSOCIATI"><span>PLANNING</span></div><nav></nav><div class="aps-nav-foot"><span><i></i>DEMO LOCALE</span><small>v${VERSION}</small></div></aside><section class="aps-workspace"><header class="aps-top"><div><small>ARCHEA WORKSPACE</small><b>Pianificazione e controllo</b></div><div><button class="aps-role" title="Cambia account demo"></button><button class="aps-close" aria-label="Chiudi"><span>×</span></button></div></header><main class="aps-main"></main></section></div><div class="aps-modal" hidden></div><div class="aps-toast" hidden></div>`;
+  root.innerHTML = `<div class="aps-shell"><aside class="aps-nav"><div class="aps-wordmark"><img src="./icons/archea-associati-logo.svg" alt="ARCHEA ASSOCIATI"></div><nav></nav><div class="aps-nav-foot"><span><i></i>DEMO LOCALE</span><small>v${VERSION}</small></div></aside><section class="aps-workspace"><header class="aps-top"><div><small>ARCHEA WORKSPACE</small><b>Pianificazione e controllo</b></div><div><button class="aps-role" title="Cambia account demo"></button><button class="aps-close" aria-label="Chiudi"><span>×</span></button></div></header><main class="aps-main"></main></section></div><div class="aps-modal" hidden></div><div class="aps-toast" hidden></div>`;
   document.body.append(root);
   root.querySelector('.aps-close').addEventListener('click', closeSuite);
   root.querySelector('.aps-role').addEventListener('click',profileSwitcher);
+  root.addEventListener('pointerdown', event => {
+    const select = event.target.closest?.('.aps-main select');
+    if (!select) return;
+    event.preventDefault();
+    openSelectPicker(select);
+  }, true);
 }
 
 function openSuite(tab = 'dashboard') {
+  if (!allowedPlanningTabs().length) return;
   ensureShell();
   currentTab = tab;
   if (!visibleProjectCodes().includes(selectedProject)) selectedProject = visibleProjectCodes()[0] || state.projects[0].code;
   const root = document.querySelector('#archea-planning-suite');
+  const integrated = !!document.querySelector('.desktop-app');
+  root.classList.toggle('aps-integrated', integrated);
   root.hidden = false;
-  const appRoot=document.querySelector('#root'); if(appRoot){appRoot.inert=true;appRoot.setAttribute('aria-hidden','true');}
+  const appRoot=document.querySelector('#root'); if(appRoot&&!integrated){appRoot.inert=true;appRoot.setAttribute('aria-hidden','true');}
+  document.querySelector('.aps-desktop-launcher')?.classList.add('on','expanded');
+  document.querySelector('.aps-desktop-subnav')?.classList.add('open');
   document.body.classList.add('aps-open');
   render();
 }
@@ -281,6 +308,8 @@ function closeSuite() {
   const root = document.querySelector('#archea-planning-suite');
   if (root) root.hidden = true;
   const appRoot=document.querySelector('#root'); if(appRoot){appRoot.inert=false;appRoot.removeAttribute('aria-hidden');}
+  document.querySelector('.aps-desktop-launcher')?.classList.remove('on','expanded');
+  document.querySelector('.aps-desktop-subnav')?.classList.remove('open');
   document.body.classList.remove('aps-open');
 }
 function toast(message) {
@@ -291,30 +320,31 @@ function toast(message) {
 }
 
 function renderNav() {
-  const allowed = {
-    resource:['dashboard','plan','timesheets'],
-    project_manager:['dashboard','plan','resources','timesheets','baseline','finance','portfolio','share'],
-    resource_manager:['dashboard','resources','timesheets','portfolio'],
-    pmo_admin:['dashboard','plan','resources','timesheets','baseline','portfolio','admin','share'],
-    finance_direction:['dashboard','portfolio','finance'],
-    client:['dashboard','plan'],
-    platform_owner:['dashboard','plan','resources','timesheets','baseline','portfolio','finance','admin','users','share'],
-  }[profile()] || ['dashboard'];
-  const allTabs = [
-    ['dashboard','dashboard','Quadro generale'],['plan','gantt',profile() === 'resource' ? 'Le mie attività' : 'Piano di progetto'],['resources','resources','Risorse e capacità'],['timesheets','timesheets','Ore e consuntivi'],['baseline','baseline','Baseline'],['portfolio','portfolio','Portfolio'],['finance','finance','Economia'],['admin','admin','PMO e standard'],['users','users','Utenti e permessi'],['share','share','Condivisione'],
-  ];
+  const allowed = allowedPlanningTabs();
+  const allTabs = planningTabs();
+  if (!allowed.length) { closeSuite(); return; }
   const tabs = allTabs.filter(([id]) => allowed.includes(id));
   if (!allowed.includes(currentTab)) currentTab = allowed[0];
   const nav = document.querySelector('.aps-nav nav');
   nav.innerHTML = tabs.map(([id,icon,label]) => `<button data-tab="${id}" class="${currentTab === id ? 'on' : ''}">${navIcon(icon)}<span>${label}</span></button>`).join('');
   nav.querySelectorAll('button').forEach(button => button.addEventListener('click', () => { currentTab = button.dataset.tab; render(); }));
+  renderDesktopPlanningSubnav(tabs);
   document.querySelector('.aps-role').textContent = `${sessionStorage.getItem(PROFILE_NAME_KEY)||profileInfo().professional} · ${profileInfo().label}`;
   document.querySelector('.aps-close').hidden = ['resource_manager','pmo_admin','client'].includes(profile());
 }
 
+function renderDesktopPlanningSubnav(tabs = planningTabs().filter(([id]) => allowedPlanningTabs().includes(id))) {
+  const subnav = document.querySelector('.aps-desktop-subnav');
+  if (!subnav) return;
+  subnav.innerHTML = tabs.map(([id,icon,label]) => `<button type="button" data-planning-tab="${id}" class="${currentTab===id?'on':''}">${navIcon(icon)}<span>${label}</span></button>`).join('');
+  subnav.querySelectorAll('[data-planning-tab]').forEach(button => button.addEventListener('click', event => {
+    event.preventDefault(); event.stopPropagation(); openSuite(button.dataset.planningTab);
+  }));
+}
+
 const heading = (title, subtitle, actions = '') => `<div class="aps-heading"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="aps-actions">${actions}</div></div>`;
 const stat = (label, value, meta = '', tone = '') => `<article class="aps-stat ${tone}"><small>${label}</small><b>${value}</b><span>${meta}</span></article>`;
-const projectSelect = () => `<label class="aps-project-select"><span>PROGETTO</span><select id="aps-project-picker">${visibleProjects().map(project => `<option value="${project.code}" ${project.code === selectedProject ? 'selected' : ''}>${project.code} · ${escapeHtml(project.name)}</option>`).join('')}</select></label>`;
+const projectSelect = () => `<label class="aps-project-select aps-popup-select"><span>PROGETTO</span><select id="aps-project-picker">${visibleProjects().map(project => `<option value="${project.code}" ${project.code === selectedProject ? 'selected' : ''}>${project.code} · ${escapeHtml(project.name)}</option>`).join('')}</select></label>`;
 const capacityRows = () => state.resources.map((resource,index) => {
   const assigned = state.tasks.filter(task => task.assignee === resource.id && task.type !== 'Summary');
   const base = assigned.reduce((sum,task) => sum + Number(task.plannedHours || 0) / Math.max(1,task.duration),0);
@@ -347,7 +377,7 @@ function dashboardView() {
   if (profile() === 'client') {
     return `${heading(`Cronoprogramma · ${project.name}`,'Vista condivisa in sola lettura. Dati interni, risorse e costi sono esclusi.')}${statRowClient(project,kpi)}<div class="aps-grid aps-grid-dashboard">${health}<section class="aps-panel"><header><div><small>MILESTONE CONDIVISE</small><h2>Approvazioni e pagamenti</h2></div></header><div class="aps-request-list">${state.tasks.filter(item => item.project === project.code && ['Approval','Payment','Milestone'].includes(item.type)).map(item => `<article><span><b>${escapeHtml(item.title)}</b><small>${dateLabel(taskEnd(item))} · ${item.phase}</small></span><em>${item.progress}%</em></article>`).join('')}</div></section></div>`;
   }
-  return `${heading('Controllo progetti','Tempi, capacità, costi e avanzamento in un’unica vista.', projectSelect())}<div class="aps-stats">${stat('Avanzamento',`${kpi.progress}%`,'media attività')}${stat('Ore pianificate',`${kpi.planned} h`,`${kpi.actual} h consuntivate`)}${stat('Task in ritardo',delayed,'rispetto al piano',delayed ? 'alert' : '')}${stat('Scostamento ore',`${kpi.actual-kpi.planned>0?'+':''}${kpi.actual-kpi.planned} h`,'actual vs planned',kpi.actual>kpi.planned?'warn':'')}${canSeeCosts()?stat('Margine previsto',`${kpi.marginPct}%`,money(kpi.margin),'dark'):''}</div><div class="aps-grid aps-grid-dashboard">${health}<section class="aps-panel"><header><div><small>PORTFOLIO</small><h2>Commesse accessibili</h2></div><strong>${active.length}</strong></header><div class="aps-project-list">${active.map(item => { const values=projectKpis(item); return `<button data-project="${item.code}"><span><b>${item.code}</b><small>${escapeHtml(item.name)} · ${item.studio}</small></span><i><em style="width:${values.progress}%"></em></i><strong>${values.progress}%</strong></button>`; }).join('')}</div></section>${can('manageResources')?`<section class="aps-panel aps-wide"><header><div><small>CAPACITY</small><h2>Carico delle risorse</h2></div><button class="aps-link" data-go="resources">Apri risorse</button></header>${capacityBars()}</section>`:''}</div>`;
+  return `${heading('Controllo progetti','Tempi, capacità, costi e avanzamento in un’unica vista.')}<div class="aps-section-controls">${projectSelect()}</div><div class="aps-stats">${stat('Avanzamento',`${kpi.progress}%`,'media attività')}${stat('Ore pianificate',`${kpi.planned} h`,`${kpi.actual} h consuntivate`)}${stat('Task in ritardo',delayed,'rispetto al piano',delayed ? 'alert' : '')}${stat('Scostamento ore',`${kpi.actual-kpi.planned>0?'+':''}${kpi.actual-kpi.planned} h`,'actual vs planned',kpi.actual>kpi.planned?'warn':'')}${canSeeCosts()?stat('Margine previsto',`${kpi.marginPct}%`,money(kpi.margin),'dark'):''}</div><div class="aps-grid aps-grid-dashboard">${health}<section class="aps-panel"><header><div><small>PORTFOLIO</small><h2>Commesse accessibili</h2></div><strong>${active.length}</strong></header><div class="aps-project-list">${active.map(item => { const values=projectKpis(item); return `<button data-project="${item.code}"><span><b>${item.code}</b><small>${escapeHtml(item.name)} · ${item.studio}</small></span><i><em style="width:${values.progress}%"></em></i><strong>${values.progress}%</strong></button>`; }).join('')}</div></section>${can('manageResources')?`<section class="aps-panel aps-wide"><header><div><small>CAPACITY</small><h2>Carico delle risorse</h2></div><button class="aps-link" data-go="resources">Apri risorse</button></header>${capacityBars()}</section>`:''}</div>`;
 }
 
 function filteredTasks() {
@@ -376,7 +406,7 @@ function ganttView() {
   const total = Math.max(45, diffDays(min,max) + 10);
   const scale = 22;
   const weeks = Array.from({ length:Math.ceil(total / 7) }, (_, index) => addDays(min,index * 7));
-  return `<div class="aps-gantt"><div class="aps-gantt-labels"><header>ATTIVITÀ</header>${tasks.map(task => `<button data-task="${task.id}" class="${task.type === 'Summary' ? 'summary' : ''}"><small>${task.wbs}</small><span>${escapeHtml(task.title)}</span></button>`).join('')}</div><div class="aps-gantt-scroll"><div class="aps-gantt-canvas" style="width:${total * scale}px"><header>${weeks.map(value => `<span style="width:${7 * scale}px">${dateLabel(value).replace(/\s\d{4}$/,'')}</span>`).join('')}</header>${tasks.map(task => { const left = diffDays(min,task.start) * scale; const width = Math.max(scale, (diffDays(task.start,taskEnd(task)) + 1) * scale); return `<div class="aps-gantt-row"><button data-task="${task.id}" class="aps-gantt-bar ${task.type.toLowerCase()}" style="left:${left}px;width:${width}px"><i style="width:${task.progress}%"></i><span>${task.progress}%</span></button></div>`; }).join('')}</div></div></div>`;
+  return `<div class="aps-gantt"><div class="aps-gantt-labels"><header>ATTIVITÀ</header>${tasks.map(task => `<button data-task="${task.id}" class="${task.type === 'Summary' ? 'summary' : ''}"><small>${task.wbs}</small><span>${escapeHtml(task.title)}</span></button>`).join('')}</div><div class="aps-gantt-scroll"><div class="aps-gantt-canvas" style="width:${total * scale}px"><header>${weeks.map(value => `<span style="width:${7 * scale}px">${dateLabel(value).replace(/\s\d{4}$/,'')}</span>`).join('')}</header>${tasks.map(task => { const left = diffDays(min,task.start) * scale; const width = Math.max(scale, (diffDays(task.start,taskEnd(task)) + 1) * scale); const remaining=100-task.progress; return `<div class="aps-gantt-row"><button data-task="${task.id}" class="aps-gantt-bar ${task.type.toLowerCase()}" style="left:${left}px;width:${width}px"><i style="width:${task.progress}%"></i>${task.progress?`<span class="aps-gantt-value done" style="left:0;width:${task.progress}%">${task.progress}%</span>`:''}${remaining?`<span class="aps-gantt-value remaining" style="left:${task.progress}%;width:${remaining}%">${remaining}%</span>`:''}</button></div>`; }).join('')}</div></div></div>`;
 }
 function boardView() {
   const tasks = filteredTasks().filter(task => task.type !== 'Summary');
@@ -384,8 +414,8 @@ function boardView() {
   return `<div class="aps-board">${columns.map(([id,label,test]) => `<section><header><span>${label}</span><b>${tasks.filter(test).length}</b></header>${tasks.filter(test).map(task => `<button data-task="${task.id}"><small>${task.wbs} · ${task.phase}</small><b>${escapeHtml(task.title)}</b><span>${escapeHtml(resourceName(task.assignee))}</span><i><em style="width:${task.progress}%"></em></i></button>`).join('')}</section>`).join('')}</div>`;
 }
 function planPage() {
-  const actions = `${projectSelect()}${canPlan() ? '<button class="aps-secondary" id="aps-undo">Annulla</button><button class="aps-secondary" id="aps-schedule">Ricalcola</button><button class="aps-primary" id="aps-new-task">+ Attività</button>' : ''}`;
-  return `${heading('Piano di progetto','WBS contrattuale, attività operative, dipendenze e avanzamento.',actions)}${planToolbar()}<section class="aps-panel aps-plan-panel">${planView === 'list' ? listView() : planView === 'board' ? boardView() : ganttView()}</section>`;
+  const actions = canPlan() ? '<button class="aps-secondary" id="aps-undo">Annulla</button><button class="aps-secondary" id="aps-schedule">Ricalcola</button><button class="aps-primary" id="aps-new-task">+ Attività</button>' : '';
+  return `${heading('Piano di progetto','WBS contrattuale, attività operative, dipendenze e avanzamento.',actions)}<div class="aps-section-controls">${projectSelect()}</div>${planToolbar()}<section class="aps-panel aps-plan-panel">${planView === 'list' ? listView() : planView === 'board' ? boardView() : ganttView()}</section>`;
 }
 
 function resourcesPage() {
@@ -395,14 +425,15 @@ function resourcesPage() {
   return `${heading('Risorse e capacità','Pool unico multi-società, disponibilità futura, assenze e richieste.',actions)}
     <div class="aps-stats">${stat('Risorse nel pool',state.resources.length,'interne, esterne e generiche')}${stat('Sovrallocazioni',rows.filter(item=>item.max>100).length,'da risolvere','alert')}${stat('Assenze pianificate',state.resources.reduce((sum,item)=>sum+item.absence.length,0),'ferie e permessi')}${stat('Richieste aperte',state.requests.filter(item=>item.status!=='Assegnata').length,'al Resource Manager')}</div>
     <section class="aps-panel"><header><div><small>CAPACITY PLANNING</small><h2>Allocazione prossime quattro settimane</h2></div><span class="aps-legend"><i></i>Disponibile <i></i>Critica <i></i>Assenza</span></header><div class="aps-capacity-table"><div class="aps-capacity-head"><span>Risorsa</span>${weeks.map(week=>`<b>${week}</b>`).join('')}</div>${rows.map(({resource,weeks:values})=>`<button data-resource="${resource.id}"><span><b>${escapeHtml(resource.name)}</b><small>${resource.kind} · ${resource.company} · ${resource.location}</small></span>${values.map((value,index)=>{const absent=resource.absence.length&&index===2;return `<i class="${absent?'absence':value>100?'over':value>90?'warn':''}">${absent?'ASSENTE':`${value}%`}</i>`}).join('')}</button>`).join('')}</div></section>
-    <div class="aps-grid"><section class="aps-panel"><header><div><small>RICHIESTE</small><h2>Risorse supplementari</h2></div><strong>${state.requests.length}</strong></header><div class="aps-request-list">${state.requests.map(item=>`<article><span><b>${item.profile}</b><small>${item.project} · ${item.department} · ${item.hours} h · richiesta da ${item.requestedBy}</small></span>${can('manageResources')&&item.status!=='Assegnata'?`<button class="aps-mini" data-request-assign="${item.id}">Assegna</button>`:`<em>${item.status}</em>`}</article>`).join('')}</div></section><section class="aps-panel"><header><div><small>TIPOLOGIE</small><h2>Composizione del pool</h2></div></header><div class="aps-donut-set">${['Internal · Nominal','Internal · Generic','External · Nominal','External · Generic'].map((kind,index)=>{const count=state.resources.filter(item=>item.kind===kind).length;return `<div><span style="--v:${count/state.resources.length*100};--c:${['#7f9185','#b9bfba','#bb9466','#a96868'][index]}"><b>${count}</b></span><small>${kind.replace(' · ',' ')}</small></div>`}).join('')}</div></section></div>`;
+    <div class="aps-grid aps-spaced-grid"><section class="aps-panel"><header><div><small>RICHIESTE</small><h2>Risorse supplementari</h2></div><strong>${state.requests.length}</strong></header><div class="aps-request-list">${state.requests.map(item=>`<article><span><b>${item.profile}</b><small>${item.project} · ${item.department} · ${item.hours} h · richiesta da ${item.requestedBy}</small></span>${can('manageResources')&&item.status!=='Assegnata'?`<button class="aps-mini" data-request-assign="${item.id}">Assegna</button>`:`<em>${item.status}</em>`}</article>`).join('')}</div></section><section class="aps-panel"><header><div><small>TIPOLOGIE</small><h2>Composizione del pool</h2></div></header><div class="aps-donut-set">${['Internal · Nominal','Internal · Generic','External · Nominal','External · Generic'].map((kind,index)=>{const count=state.resources.filter(item=>item.kind===kind).length;return `<div><span style="--v:${count/state.resources.length*100};--c:${['#7f9185','#b9bfba','#bb9466','#a96868'][index]}"><b>${count}</b></span><small>${kind.replace(' · ',' ')}</small></div>`}).join('')}</div></section></div>`;
 }
 
 function baselinePage() {
   const baseline = state.baselines.find(item => item.project === selectedProject && item.active);
   const project = projectByCode(selectedProject);
   const tasks = state.tasks.filter(task => task.project === selectedProject && task.type !== 'Summary');
-  return `${heading('Baseline e avanzamento','Confronta la previsione contrattuale con il piano corrente.',`${projectSelect()}${canPlan() ? '<button class="aps-secondary" id="aps-baseline-increment">Aggiorna nuove attività</button><button class="aps-primary" id="aps-capture-baseline">Scatta baseline</button>' : ''}`)}
+  return `${heading('Baseline e avanzamento','Confronta la previsione contrattuale con il piano corrente.',`${canPlan() ? '<button class="aps-secondary" id="aps-baseline-increment">Aggiorna nuove attività</button><button class="aps-primary" id="aps-capture-baseline">Scatta baseline</button>' : ''}`)}
+    <div class="aps-section-controls">${projectSelect()}</div>
     ${baseline ? `<div class="aps-baseline-banner"><span><small>BASELINE ATTIVA</small><b>${baseline.name}</b></span><span>Creata ${new Date(baseline.date).toLocaleString('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span><em>${baseline.tasks.length} attività congelate</em></div>` : '<div class="aps-empty aps-baseline-empty"><b>Nessuna baseline salvata</b><span>Salva la pianificazione contrattuale per misurare gli scostamenti futuri.</span></div>'}
     <section class="aps-panel"><header><div><small>VARIANZE</small><h2>${project.code} · ${escapeHtml(project.name)}</h2></div></header><div class="aps-table-wrap"><table class="aps-table"><thead><tr><th>Attività</th><th>Fine baseline</th><th>Fine corrente</th><th>Slittamento</th><th>Avanzamento</th></tr></thead><tbody>${tasks.map(task => { const old = baseline?.tasks.find(item => item.id === task.id); const slip = old ? diffDays(old.end,taskEnd(task)) : null; return `<tr data-task="${task.id}"><td><b>${task.wbs} · ${escapeHtml(task.title)}</b><small>${task.phase}</small></td><td>${old ? dateLabel(old.end) : 'Nuova attività'}</td><td>${dateLabel(taskEnd(task))}</td><td><span class="aps-variance ${slip > 0 ? 'late' : slip < 0 ? 'early' : ''}">${slip == null ? '—' : slip > 0 ? `+${slip} gg` : `${slip} gg`}</span></td><td>${task.progress}%</td></tr>`; }).join('')}</tbody></table></div></section>`;
 }
@@ -421,7 +452,8 @@ function financePage() {
   const projects = profile()==='project_manager' ? visibleProjects() : state.projects;
   const filtered = projects.filter(project => financeFilter==='all' || (financeFilter==='to-collect' && state.tasks.some(task=>task.project===project.code&&task.type==='Payment'&&task.progress<100)) || (financeFilter==='external' && project.externalCosts>0) || (financeFilter==='low-margin' && projectKpis(project).marginPct<55));
   const revenue=projects.reduce((sum,item)=>sum+item.revenue,0); const external=projects.reduce((sum,item)=>sum+item.externalCosts,0); const internal=projects.reduce((sum,item)=>sum+projectKpis(item).internalCost,0); const margin=revenue-external-internal;
-  return `${heading('Economia di commessa',canSeeCosts()?'Controllo completo di ricavi, costi interni, consulenti e marginalità.':'Valori contrattuali, milestone di pagamento e soli costi esterni.',`${projectSelect()}${can('manageFinance')||profile()==='project_manager'?'<button class="aps-primary" id="aps-new-external">+ Costo esterno</button>':''}`)}
+  return `${heading('Economia di commessa',canSeeCosts()?'Controllo completo di ricavi, costi interni, consulenti e marginalità.':'Valori contrattuali, milestone di pagamento e soli costi esterni.',`${can('manageFinance')||profile()==='project_manager'?'<button class="aps-primary" id="aps-new-external">+ Costo esterno</button>':''}`)}
+    <div class="aps-section-controls">${projectSelect()}</div>
     <div class="aps-stats">${stat('Valore contrattuale',money(revenue),'portfolio visibile')}${stat('Consulenti esterni',money(external),'pacchetti e ore')}${canSeeCosts()?stat('Costo interno',money(internal),'riservato Finance'):stat('Ore pianificate',`${projects.reduce((sum,item)=>sum+projectKpis(item).planned,0)} h`,'senza costo interno')}${canSeeCosts()?stat('Margine',money(margin),`${Math.round(margin/Math.max(1,revenue)*100)}%`,'dark'):stat('Contratti firmati',projects.filter(item=>item.contractSigned).length,'commesse')}</div>
     <div class="aps-filterbar"><label><span>Vista economica</span><select id="aps-finance-filter"><option value="all">Tutte le commesse</option><option value="to-collect" ${financeFilter==='to-collect'?'selected':''}>Da incassare</option><option value="external" ${financeFilter==='external'?'selected':''}>Con costi esterni</option>${canSeeCosts()?`<option value="low-margin" ${financeFilter==='low-margin'?'selected':''}>Margine sotto soglia</option>`:''}</select></label></div>
     <div class="aps-grid"><section class="aps-panel aps-wide"><header><div><small>COMMESSE</small><h2>Quadro economico</h2></div></header><div class="aps-table-wrap"><table class="aps-table"><thead><tr><th>Progetto</th><th>Contratto</th><th>Fatturato</th><th>Costi esterni</th><th>Ore</th>${canSeeCosts()?'<th>Costo interno</th><th>Margine</th>':''}</tr></thead><tbody>${filtered.map(project=>{const kpi=projectKpis(project);return `<tr data-project-detail="${project.code}"><td><b>${project.code} · ${escapeHtml(project.name)}</b><small>${project.studio} · ${project.executor}</small></td><td>${project.contractSigned?'Firmato':'In definizione'}<small>${project.contractFile||'Nessun PDF'}</small></td><td>${money(project.revenue)}</td><td>${money(project.externalCosts)}</td><td>${kpi.actual} / ${kpi.planned} h</td>${canSeeCosts()?`<td>${money(kpi.internalCost)}</td><td><b>${money(kpi.margin)}</b><small>${kpi.marginPct}%</small></td>`:''}</tr>`}).join('')}</tbody></table></div></section><section class="aps-panel"><header><div><small>PAGAMENTI</small><h2>Milestone contrattuali</h2></div></header><div class="aps-request-list">${state.tasks.filter(task=>task.type==='Payment'&&projects.some(project=>project.code===task.project)).map(task=>`<article><span><b>${task.project} · ${escapeHtml(task.title)}</b><small>Scadenza ${dateLabel(taskEnd(task))}</small></span><em class="aps-payment ${task.progress===100?'paid':task.progress>0?'partial':'due'}">${task.progress===100?'Pagato':task.progress>0?'Parziale':'Da pagare'} · ${money(task.contractualFee||0)}</em></article>`).join('')||'<p class="aps-copy">Nessuna milestone di pagamento nel filtro corrente.</p>'}</div></section><section class="aps-panel"><header><div><small>CONSULENTI</small><h2>Contratti esterni</h2></div></header><div class="aps-request-list">${state.externalContracts.filter(item=>projects.some(project=>project.code===item.project)).map(item=>`<article><span><b>${item.supplier}</b><small>${item.project} · ${item.model}${item.purchasedHours?` · ${item.usedHours}/${item.purchasedHours} h`:''}</small></span><em>${money(item.amount)}</em></article>`).join('')}</div></section>${canSeeCosts()?`<section class="aps-panel"><header><div><small>INTERCOMPANY</small><h2>Ripartizioni tra società</h2></div></header><div class="aps-request-list">${state.intercompany.map(item=>`<article><span><b>${item.project} · ${item.executor}</b><small>Owner ${item.owner} · ${item.hours} h</small></span><em>${item.revenueShare}% ricavi</em></article>`).join('')}</div></section>`:''}</div>`;
@@ -527,6 +559,28 @@ function openModal(title, subtitle, body, submitLabel, onSubmit) {
   modal.querySelector('form').addEventListener('submit', event => { event.preventDefault(); onSubmit?.(new FormData(event.target)); close(); });
 }
 
+function openSelectPicker(select) {
+  const modal = document.querySelector('.aps-modal');
+  if (!modal || !select?.options?.length) return;
+  const field = select.closest('label');
+  const title = field?.querySelector(':scope > span')?.textContent?.trim() || select.name || 'Seleziona';
+  const options = [...select.options].map(option => ({ value:option.value, label:option.textContent.trim(), selected:option.selected }));
+  modal.hidden = false;
+  modal.innerHTML = `<div class="aps-dialog aps-select-dialog"><header><div><small>ARCHEA WORKSPACE</small><h2>${escapeHtml(title)}</h2><p>Cerca e seleziona una voce</p></div><button type="button" class="aps-dialog-close"><span>×</span></button></header><div class="aps-select-body"><input class="aps-select-search" type="search" placeholder="Cerca…" autofocus><div class="aps-select-options">${options.map(option=>`<button type="button" data-select-value="${escapeHtml(option.value)}" class="${option.selected?'on':''}"><span><b>${escapeHtml(option.label)}</b></span><i>${option.selected?'✓':''}</i></button>`).join('')}</div></div></div>`;
+  const close = () => { modal.hidden=true; modal.innerHTML=''; modal.onmousedown=null; };
+  modal.querySelector('.aps-dialog-close').addEventListener('click',close);
+  modal.onmousedown = event => { if (event.target===modal) close(); };
+  const search=modal.querySelector('.aps-select-search');
+  search.addEventListener('input',()=>modal.querySelectorAll('[data-select-value]').forEach(button=>button.hidden=!button.textContent.toLowerCase().includes(search.value.toLowerCase())));
+  modal.querySelectorAll('[data-select-value]').forEach(button=>button.addEventListener('click',()=>{
+    const value=button.dataset.selectValue;
+    close();
+    select.value=value;
+    select.dispatchEvent(new Event('change',{bubbles:true}));
+  }));
+  requestAnimationFrame(()=>search.focus());
+}
+
 function timeModal() {
   const tasks=state.tasks.filter(item=>item.assignee===currentResourceId()&&item.type!=='Summary');
   openModal('Registra ore','Il consuntivo sarà inviato al Project Manager per la verifica.',`<div class="aps-form-grid"><label>Data<input type="date" name="date" value="${iso(new Date())}" required></label><label>Progetto<select name="project">${visibleProjects().map(item=>`<option>${item.code}</option>`).join('')}</select></label><label class="wide">Attività<select name="task">${tasks.map(item=>`<option value="${item.id}">${item.project} · ${item.wbs} · ${escapeHtml(item.title)}</option>`).join('')}</select></label><label>Ore<input type="number" name="hours" min="0.5" max="9" step="0.5" value="8"></label><label class="wide">Descrizione<input name="note" required placeholder="Attività svolta"></label></div>`,'Invia consuntivo',form=>{checkpoint();const values=Object.fromEntries(form);state.timesheets.push({id:uid('time'),resource:currentResourceId(),...values,hours:Number(values.hours),status:'Inviato'});save();render();toast('Ore inviate al Project Manager');});
@@ -602,7 +656,8 @@ function selectDemoProfile(id) {
   sessionStorage.setItem(PROFILE_KEY,id);
   sessionStorage.setItem(PROFILE_NAME_KEY,account.name);
   sessionStorage.setItem('archea-demo-user',info.base);
-  sessionStorage.setItem('archea-planning-autopen','1');
+  if(id==='resource') sessionStorage.removeItem('archea-planning-autopen');
+  else sessionStorage.setItem('archea-planning-autopen','1');
   location.reload();
 }
 function profileSwitcher(){
@@ -614,11 +669,11 @@ function injectDemoAccounts(){
   const trial=[...document.querySelectorAll('body *')].find(node=>node.children.length===0&&node.textContent.trim()==='Account di prova');
   if(!trial)return;
   const host=trial.parentElement;
-  const section=document.createElement('section');section.className='aps-login-accounts';section.innerHTML=`<header><small>GESTIONALE COMPLETO</small><b>Profili applicativi demo</b><span>Password dimostrativa: demo</span></header><div>${DEMO_ACCOUNTS.map(account=>{const info=PLATFORM_PROFILES[account.id];return `<button type="button" data-login-profile="${account.id}"><i style="--profile:${info.color}"></i><span><b>${escapeHtml(account.name)}</b><small>${info.label} · ${info.professional}</small></span></button>`}).join('')}</div>`;host.append(section);
+  const section=document.createElement('section');section.className='aps-login-accounts';section.innerHTML=`<header><small>GESTIONALE COMPLETO</small><b>Profili applicativi demo</b><span>Password dimostrativa: demo</span></header><div>${DEMO_ACCOUNTS.map(account=>{const info=PLATFORM_PROFILES[account.id];return `<button type="button" data-login-profile="${account.id}"><i style="--profile:${info.color}"></i><b>${escapeHtml(account.name)}</b><small>${info.label} · ${info.professional}</small></button>`}).join('')}</div>`;host.append(section);
   section.querySelectorAll('[data-login-profile]').forEach(button=>button.addEventListener('click',()=>selectDemoProfile(button.dataset.loginProfile)));
 }
 function applyShellPermissions(){
-  const allowed={resource:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro','Pianificazione'],project_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Cantiere','Contabilità','Insight','Calendario','Altro','Pianificazione'],resource_manager:['Oggi','Chat','Calendario','Pianificazione'],pmo_admin:['Oggi','Progetti','Task Manager','Insight','Calendario','Pianificazione'],finance_direction:['Oggi','Progetti','Contabilità','Insight','Calendario','Organico','Pianificazione'],client:['Pianificazione'],platform_owner:null}[profile()];
+  const allowed={resource:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],project_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Cantiere','Contabilità','Insight','Calendario','Altro','Pianificazione'],resource_manager:['Oggi','Chat','Calendario','Pianificazione'],pmo_admin:['Oggi','Progetti','Task Manager','Insight','Calendario','Pianificazione'],finance_direction:['Oggi','Progetti','Contabilità','Insight','Calendario','Organico','Pianificazione'],client:['Pianificazione'],platform_owner:null}[profile()];
   document.documentElement.dataset.apsProfile=profile();
   document.querySelectorAll('button').forEach(button=>{
     if(button.closest('#archea-planning-suite')||button.closest('.aps-login-accounts'))return;
@@ -628,11 +683,27 @@ function applyShellPermissions(){
   });
 }
 
+function applyRuntimePolish(){
+  document.querySelectorAll('.desk-footer,.foot,.dev-release,.dev-system-info').forEach(container=>{
+    const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT);
+    let node;
+    while((node=walker.nextNode())) if(node.nodeValue.includes('0.12.1')) node.nodeValue=node.nodeValue.replaceAll('0.12.1',VERSION);
+  });
+}
+
 function injectLaunchers() {
+  if(profile()==='resource'){
+    document.querySelector('.aps-desktop-launcher')?.remove();
+    document.querySelector('.aps-desktop-subnav')?.remove();
+    document.querySelector('.aps-mobile-launcher')?.remove();
+    closeSuite();
+    injectDemoAccounts(); applyShellPermissions(); applyRuntimePolish(); return;
+  }
   if (!document.querySelector('.aps-desktop-launcher')) {
     const nav = document.querySelector('.desk-sidebar nav');
     if (nav) {
-      const button = document.createElement('button'); button.className = 'aps-desktop-launcher'; button.innerHTML = `${navIcon('plan')}<span>Pianificazione</span>`; nav.append(button);
+      const button = document.createElement('button'); button.className = 'aps-desktop-launcher'; button.innerHTML = `${navIcon('plan')}<span>Pianificazione</span><i aria-hidden="true">⌄</i>`; nav.append(button);
+      const subnav=document.createElement('div'); subnav.className='aps-desktop-subnav'; nav.append(subnav); renderDesktopPlanningSubnav();
     }
   }
   if (!document.querySelector('.aps-mobile-launcher')) {
@@ -643,6 +714,7 @@ function injectLaunchers() {
   }
   injectDemoAccounts();
   applyShellPermissions();
+  applyRuntimePolish();
   if((sessionStorage.getItem('archea-planning-autopen')==='1'||['resource_manager','pmo_admin','client'].includes(profile()))&&document.querySelector('.aps-desktop-launcher,.aps-mobile-launcher')&&document.querySelector('#archea-planning-suite')?.hidden){sessionStorage.removeItem('archea-planning-autopen');openSuite('dashboard');}
 }
 
@@ -659,6 +731,8 @@ document.addEventListener('click', event => {
     event.stopPropagation();
     openSuite('dashboard');
   }
+  const baseNavButton=event.target.closest?.('.desk-sidebar nav > button:not(.aps-desktop-launcher),.desk-developer-button,.desk-settings-button');
+  if(baseNavButton&&!event.target.closest?.('.aps-desktop-subnav')) closeSuite();
 }, true);
 window.addEventListener('keydown',event => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !document.querySelector('#archea-planning-suite')?.hidden) { event.preventDefault(); undo(); } if (event.key === 'Escape' && !document.querySelector('#archea-planning-suite')?.hidden) closeSuite(); });
 
