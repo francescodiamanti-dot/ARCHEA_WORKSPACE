@@ -33,11 +33,17 @@ body.aps-open{overflow:hidden}
 .aps-login-accounts button:last-child{border-bottom:0}.aps-login-accounts button:hover{transform:none;background:#f1f3f0}
 .aps-login-accounts button>b{font-size:9px;text-align:left}.aps-login-accounts button>small{color:#707873;font-size:7px;text-align:right;white-space:nowrap}
 
+/* Il login usa un solo elenco, nello stile originario dell'app */
+.demo-accounts>.aps-login-accounts{display:none!important}.demo-accounts>button[data-login-profile]{min-height:48px}.demo-accounts>button[data-login-profile]>span{display:flex;align-items:center;gap:7px}.demo-accounts>button[data-login-profile]>small{margin-left:auto;text-align:right}
+
 .aps-wordmark{justify-content:center;padding:6px 18px 27px}.aps-wordmark img{width:142px;max-width:100%}
 .aps-heading{align-items:flex-end}.aps-heading .aps-secondary,.aps-heading .aps-primary{background:#252a27;color:#fff}
-.aps-section-controls{display:flex;align-items:flex-end;gap:10px;margin:-7px 0 18px}.aps-section-controls .aps-project-select{width:min(420px,100%)}
-.aps-project-select select,.aps-filterbar select{cursor:pointer;background-color:#fff;box-shadow:none}
-.aps-popup-select{position:relative}.aps-popup-select:after,.aps-filterbar label:has(select):after{content:"⌄";position:absolute;right:11px;bottom:9px;color:#727a75;font-size:10px;pointer-events:none}
+.aps-section-controls{display:flex;align-items:flex-end;gap:10px;margin:0 0 18px}.aps-section-controls .aps-project-select{width:min(520px,100%)}
+.aps-project-select,.aps-filterbar label:has(select){position:relative;display:grid;gap:4px;min-height:62px;padding:10px 44px 9px 14px;border:1px solid var(--aps-line);border-radius:14px;background:#fff;box-shadow:0 5px 18px #27312b05}
+.aps-project-select span,.aps-filterbar label>span{font-size:7px;font-weight:850;letter-spacing:.12em;color:#7f8781;text-transform:uppercase}
+.aps-project-select select,.aps-filterbar select{width:100%;height:24px;padding:0;border:0;border-radius:0;outline:0;appearance:none;cursor:pointer;background:transparent;color:#242925;font-size:11px;font-weight:750;box-shadow:none}
+.aps-popup-select:after,.aps-filterbar label:has(select):after{content:"⌄";position:absolute;right:17px;top:50%;color:#303632;font-size:15px;line-height:1;pointer-events:none;transform:translateY(-50%)}
+.aps-filterbar{align-items:stretch;gap:10px;margin:0 0 18px}.aps-filterbar label{flex:0 1 260px;min-width:220px}
 .aps-select-dialog{width:min(620px,calc(100vw - 30px))}.aps-select-body{padding:18px 22px 22px}
 .aps-select-search{width:100%;height:42px;margin-bottom:10px;padding:0 13px;border:1px solid var(--aps-line);border-radius:11px;background:#fff;color:var(--aps-ink);font-size:10px;outline:0}
 .aps-select-options{display:grid;max-height:420px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
@@ -51,12 +57,15 @@ body.aps-open{overflow:hidden}
 
 .aps-main>*{animation:aps-section-in .48s cubic-bezier(.22,1,.36,1) both}.aps-main>*:nth-child(2){animation-delay:.04s}.aps-main>*:nth-child(3){animation-delay:.08s}.aps-main>*:nth-child(4){animation-delay:.12s}
 .aps-stat b,.aps-ring,.aps-donut-set>div>span{animation:aps-kpi-in .72s cubic-bezier(.22,1.3,.36,1) both}.aps-health-lines em,.aps-project-list em,.aps-capacity-bars em,.aps-progress em,.aps-board button>i em{transform-origin:left;animation:aps-bar-in .75s cubic-bezier(.22,1,.36,1) both}
+.aps-stat,.aps-panel,.aps-project-list button,.aps-board button,.aps-request-list article,.aps-capacity-table>button,.aps-governance article,.aps-share-grid>button,.aps-share-grid>label{transition:transform .24s cubic-bezier(.22,1,.36,1),box-shadow .24s ease,background-color .2s ease}
+.aps-stat:hover,.aps-panel:hover,.aps-project-list button:hover,.aps-board button:hover,.aps-request-list article:hover,.aps-governance article:hover{transform:translateY(-3px);box-shadow:0 15px 34px #27312b14}
+.aps-capacity-table>button:hover{transform:translateX(3px)}
 @keyframes aps-section-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes aps-kpi-in{from{opacity:.2;transform:scale(.9)}to{opacity:1;transform:none}}@keyframes aps-bar-in{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 
 /* Pianificazione integrata nella navigazione desktop */
 .aps-desktop-launcher{grid-template-columns:18px minmax(0,1fr) 12px}.aps-desktop-launcher>i{font-size:10px;font-style:normal;transition:transform .28s ease}.aps-desktop-launcher.expanded>i{transform:rotate(180deg)}
 .aps-desktop-launcher.on{background:var(--aps-active)!important;color:#fff!important;font-weight:800}.aps-desktop-launcher.on svg{animation:aps-spring .58s cubic-bezier(.18,1.5,.32,1)}
-.aps-desktop-subnav{display:none;gap:2px;padding:3px 0 7px 17px}.aps-desktop-subnav.open{display:grid}.aps-desktop-subnav button{display:grid!important;grid-template-columns:15px minmax(0,1fr);align-items:center;gap:9px;min-height:33px!important;padding:0 9px!important;border-radius:9px!important;background:transparent!important;color:#aeb6b0!important;font-size:9px!important;text-align:left}.aps-desktop-subnav button svg{width:14px!important;height:14px!important}.aps-desktop-subnav button:hover,.aps-desktop-subnav button.on{background:#ffffff10!important;color:#fff!important}.aps-desktop-subnav button.on{font-weight:800}
+.aps-desktop-subnav{display:none;gap:2px;padding:4px 0 8px 17px}.aps-desktop-subnav.open{display:grid}.aps-desktop-subnav button{display:grid!important;grid-template-columns:18px minmax(0,1fr);align-items:center;gap:11px;min-height:39px!important;padding:0 13px!important;border-radius:10px!important;background:transparent!important;color:#aeb6b0!important;font-size:12px!important;text-align:left}.aps-desktop-subnav button svg{width:17px!important;height:17px!important}.aps-desktop-subnav button:hover,.aps-desktop-subnav button.on{background:#ffffff10!important;color:#fff!important}.aps-desktop-subnav button.on{font-weight:800}
 @media(min-width:901px){.aps.aps-integrated{left:220px}.aps.aps-integrated .aps-shell{grid-template-columns:minmax(0,1fr)}.aps.aps-integrated .aps-nav{display:none}.aps.aps-integrated .aps-close{display:none!important}.aps.aps-integrated .aps-workspace{grid-template-rows:76px minmax(0,1fr)}body:has(.desktop-app.compact-menu) .aps.aps-integrated{left:78px}}
 
 /* Correzioni applicazione principale */

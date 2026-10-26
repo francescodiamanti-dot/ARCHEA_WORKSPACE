@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'archea-planning-suite-v2';
-const VERSION = '0.12.2';
+const VERSION = '0.12.3';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 
@@ -149,6 +149,7 @@ let portfolioStatus = 'all';
 let portfolioCompany = 'all';
 let financeFilter = 'all';
 let modalAction = null;
+let previousBaseNavButton = null;
 
 const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 const checkpoint = () => { undoStack.push(JSON.stringify(state)); if (undoStack.length > 20) undoStack.shift(); };
@@ -282,11 +283,26 @@ function ensureShell() {
   root.querySelector('.aps-close').addEventListener('click', closeSuite);
   root.querySelector('.aps-role').addEventListener('click',profileSwitcher);
   root.addEventListener('pointerdown', event => {
-    const select = event.target.closest?.('.aps-main select');
+    const select = event.target.closest?.('select');
     if (!select) return;
     event.preventDefault();
     openSelectPicker(select);
   }, true);
+}
+
+function syncBaseNavigation(planningIsOpen, restore = true) {
+  const buttons = [...document.querySelectorAll('.desk-sidebar nav > button:not(.aps-desktop-launcher)')];
+  if (planningIsOpen) {
+    previousBaseNavButton ||= buttons.find(button => button.classList.contains('on')) || null;
+    buttons.forEach(button => {
+      button.classList.remove('on');
+      if (button.getAttribute('aria-current') === 'page') button.removeAttribute('aria-current');
+      if (button.getAttribute('aria-selected') === 'true') button.setAttribute('aria-selected','false');
+    });
+    return;
+  }
+  if (restore && previousBaseNavButton?.isConnected) previousBaseNavButton.classList.add('on');
+  previousBaseNavButton = null;
 }
 
 function openSuite(tab = 'dashboard') {
@@ -301,15 +317,17 @@ function openSuite(tab = 'dashboard') {
   const appRoot=document.querySelector('#root'); if(appRoot&&!integrated){appRoot.inert=true;appRoot.setAttribute('aria-hidden','true');}
   document.querySelector('.aps-desktop-launcher')?.classList.add('on','expanded');
   document.querySelector('.aps-desktop-subnav')?.classList.add('open');
+  syncBaseNavigation(true);
   document.body.classList.add('aps-open');
   render();
 }
-function closeSuite() {
+function closeSuite(restoreBaseNavigation = true) {
   const root = document.querySelector('#archea-planning-suite');
   if (root) root.hidden = true;
   const appRoot=document.querySelector('#root'); if(appRoot){appRoot.inert=false;appRoot.removeAttribute('aria-hidden');}
   document.querySelector('.aps-desktop-launcher')?.classList.remove('on','expanded');
   document.querySelector('.aps-desktop-subnav')?.classList.remove('open');
+  syncBaseNavigation(false, restoreBaseNavigation);
   document.body.classList.remove('aps-open');
 }
 function toast(message) {
@@ -503,6 +521,40 @@ function render() {
   const main = document.querySelector('.aps-main');
   main.innerHTML = ({dashboard:dashboardView,plan:planPage,resources:resourcesPage,timesheets:timesheetsPage,baseline:baselinePage,portfolio:portfolioPage,finance:financePage,admin:adminPage,users:usersPage,share:sharePage}[currentTab] || dashboardView)();
   bindPage();
+  animatePlanningMetrics();
+}
+
+function animatePlanningMetrics() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const candidates = document.querySelectorAll('.aps-main .aps-stat b,.aps-main .aps-ring b,.aps-main .aps-donut-set b,.aps-main .aps-health-lines b,.aps-main .aps-project-list strong,.aps-main .aps-progress b,.aps-main .aps-capacity-table button>i:not(.absence)');
+  candidates.forEach(element => {
+    const original = element.textContent.trim();
+    if (/\b(gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)\b/i.test(original)) return;
+    const match = original.match(/^([^\d+-]*)([+-]?[\d.]+(?:,[\d]+)?)(.*)$/);
+    if (!match || /\d/.test(match[3]) || (/[a-z]/i.test(match[3]) && !/^\s*h\b/i.test(match[3]))) return;
+    const raw = match[2];
+    const target = Number(raw.replace(/\./g,'').replace(',','.'));
+    if (!Number.isFinite(target)) return;
+    const prefix = match[1];
+    const suffix = match[3];
+    const decimals = raw.includes(',') ? raw.split(',')[1].length : 0;
+    const formatter = new Intl.NumberFormat('it-IT',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+    const setText = value => {
+      if (element.childNodes.length === 1 && element.firstChild?.nodeType === Node.TEXT_NODE) element.firstChild.nodeValue = value;
+      else element.textContent = value;
+    };
+    const start = performance.now();
+    const frame = now => {
+      const progress = Math.min(1,(now-start)/1000);
+      const eased = 1-Math.pow(1-progress,3);
+      const value = target * eased;
+      const displayed = decimals ? value : Math.round(value);
+      setText(`${prefix}${formatter.format(displayed)}${suffix}`);
+      if (progress < 1) requestAnimationFrame(frame);
+      else setText(original);
+    };
+    requestAnimationFrame(frame);
+  });
 }
 
 function bindPage() {
@@ -560,19 +612,23 @@ function openModal(title, subtitle, body, submitLabel, onSubmit) {
 }
 
 function openSelectPicker(select) {
-  const modal = document.querySelector('.aps-modal');
-  if (!modal || !select?.options?.length) return;
+  const root = document.querySelector('#archea-planning-suite');
+  if (!root || !select?.options?.length || select.disabled) return;
   const field = select.closest('label');
-  const title = field?.querySelector(':scope > span')?.textContent?.trim() || select.name || 'Seleziona';
+  const inlineLabel = field ? [...field.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).map(node=>node.nodeValue.trim()).filter(Boolean).join(' ') : '';
+  const title = field?.querySelector(':scope > span')?.textContent?.trim() || inlineLabel || select.name || 'Seleziona';
   const options = [...select.options].map(option => ({ value:option.value, label:option.textContent.trim(), selected:option.selected }));
-  modal.hidden = false;
-  modal.innerHTML = `<div class="aps-dialog aps-select-dialog"><header><div><small>ARCHEA WORKSPACE</small><h2>${escapeHtml(title)}</h2><p>Cerca e seleziona una voce</p></div><button type="button" class="aps-dialog-close"><span>×</span></button></header><div class="aps-select-body"><input class="aps-select-search" type="search" placeholder="Cerca…" autofocus><div class="aps-select-options">${options.map(option=>`<button type="button" data-select-value="${escapeHtml(option.value)}" class="${option.selected?'on':''}"><span><b>${escapeHtml(option.label)}</b></span><i>${option.selected?'✓':''}</i></button>`).join('')}</div></div></div>`;
-  const close = () => { modal.hidden=true; modal.innerHTML=''; modal.onmousedown=null; };
-  modal.querySelector('.aps-dialog-close').addEventListener('click',close);
-  modal.onmousedown = event => { if (event.target===modal) close(); };
-  const search=modal.querySelector('.aps-select-search');
-  search.addEventListener('input',()=>modal.querySelectorAll('[data-select-value]').forEach(button=>button.hidden=!button.textContent.toLowerCase().includes(search.value.toLowerCase())));
-  modal.querySelectorAll('[data-select-value]').forEach(button=>button.addEventListener('click',()=>{
+  root.querySelector('.aps-select-layer')?.remove();
+  const layer=document.createElement('div');
+  layer.className='aps-modal aps-select-layer';
+  layer.innerHTML = `<div class="aps-dialog aps-select-dialog"><header><div><small>ARCHEA WORKSPACE</small><h2>${escapeHtml(title)}</h2><p>Cerca e seleziona una voce</p></div><button type="button" class="aps-dialog-close"><span>×</span></button></header><div class="aps-select-body"><input class="aps-select-search" type="search" placeholder="Cerca…" autofocus><div class="aps-select-options">${options.map(option=>`<button type="button" data-select-value="${escapeHtml(option.value)}" class="${option.selected?'on':''}"><span><b>${escapeHtml(option.label)}</b></span><i>${option.selected?'✓':''}</i></button>`).join('')}</div></div></div>`;
+  root.append(layer);
+  const close = () => layer.remove();
+  layer.querySelector('.aps-dialog-close').addEventListener('click',close);
+  layer.onmousedown = event => { if (event.target===layer) close(); };
+  const search=layer.querySelector('.aps-select-search');
+  search.addEventListener('input',()=>layer.querySelectorAll('[data-select-value]').forEach(button=>button.hidden=!button.textContent.toLowerCase().includes(search.value.toLowerCase())));
+  layer.querySelectorAll('[data-select-value]').forEach(button=>button.addEventListener('click',()=>{
     const value=button.dataset.selectValue;
     close();
     select.value=value;
@@ -665,12 +721,23 @@ function profileSwitcher(){
   document.querySelectorAll('[data-profile-pick]').forEach(button=>button.addEventListener('click',()=>selectDemoProfile(button.dataset.profilePick)));
 }
 function injectDemoAccounts(){
-  if(document.querySelector('.aps-login-accounts'))return;
-  const trial=[...document.querySelectorAll('body *')].find(node=>node.children.length===0&&node.textContent.trim()==='Account di prova');
-  if(!trial)return;
-  const host=trial.parentElement;
-  const section=document.createElement('section');section.className='aps-login-accounts';section.innerHTML=`<header><small>GESTIONALE COMPLETO</small><b>Profili applicativi demo</b><span>Password dimostrativa: demo</span></header><div>${DEMO_ACCOUNTS.map(account=>{const info=PLATFORM_PROFILES[account.id];return `<button type="button" data-login-profile="${account.id}"><i style="--profile:${info.color}"></i><b>${escapeHtml(account.name)}</b><small>${info.label} · ${info.professional}</small></button>`}).join('')}</div>`;host.append(section);
-  section.querySelectorAll('[data-login-profile]').forEach(button=>button.addEventListener('click',()=>selectDemoProfile(button.dataset.loginProfile)));
+  const container=document.querySelector('.demo-accounts');
+  if(!container)return;
+  const existing=[...container.querySelectorAll(':scope > button')];
+  const alreadyComplete=existing.length===DEMO_ACCOUNTS.length&&existing.every(button=>button.hasAttribute('data-login-profile'));
+  if(alreadyComplete)return;
+  container.querySelector('.aps-login-accounts')?.remove();
+  existing.forEach(button=>button.remove());
+  DEMO_ACCOUNTS.forEach(account=>{
+    const info=PLATFORM_PROFILES[account.id];
+    const button=document.createElement('button');
+    button.type='button';
+    button.dataset.loginProfile=account.id;
+    button.className=account.id===profile()?'on':'';
+    button.innerHTML=`<span>${escapeHtml(account.name)}${account.id==='platform_owner'?'<em>MASTER</em>':''}</span><small>${info.label} · ${info.professional}</small>`;
+    button.addEventListener('click',()=>selectDemoProfile(account.id));
+    container.append(button);
+  });
 }
 function applyShellPermissions(){
   const allowed={resource:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],project_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Cantiere','Contabilità','Insight','Calendario','Altro','Pianificazione'],resource_manager:['Oggi','Chat','Calendario','Pianificazione'],pmo_admin:['Oggi','Progetti','Task Manager','Insight','Calendario','Pianificazione'],finance_direction:['Oggi','Progetti','Contabilità','Insight','Calendario','Organico','Pianificazione'],client:['Pianificazione'],platform_owner:null}[profile()];
@@ -715,6 +782,7 @@ function injectLaunchers() {
   injectDemoAccounts();
   applyShellPermissions();
   applyRuntimePolish();
+  if(!document.querySelector('#archea-planning-suite')?.hidden) syncBaseNavigation(true);
   if((sessionStorage.getItem('archea-planning-autopen')==='1'||['resource_manager','pmo_admin','client'].includes(profile()))&&document.querySelector('.aps-desktop-launcher,.aps-mobile-launcher')&&document.querySelector('#archea-planning-suite')?.hidden){sessionStorage.removeItem('archea-planning-autopen');openSuite('dashboard');}
 }
 
@@ -732,7 +800,7 @@ document.addEventListener('click', event => {
     openSuite('dashboard');
   }
   const baseNavButton=event.target.closest?.('.desk-sidebar nav > button:not(.aps-desktop-launcher),.desk-developer-button,.desk-settings-button');
-  if(baseNavButton&&!event.target.closest?.('.aps-desktop-subnav')) closeSuite();
+  if(baseNavButton&&!event.target.closest?.('.aps-desktop-subnav')) closeSuite(false);
 }, true);
 window.addEventListener('keydown',event => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !document.querySelector('#archea-planning-suite')?.hidden) { event.preventDefault(); undo(); } if (event.key === 'Escape' && !document.querySelector('#archea-planning-suite')?.hidden) closeSuite(); });
 
