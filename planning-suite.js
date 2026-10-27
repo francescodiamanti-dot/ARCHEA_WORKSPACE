@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'archea-planning-suite-v3';
-const VERSION = '0.12.4';
+const VERSION = '0.12.5';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 
@@ -815,6 +815,7 @@ function injectLaunchers() {
     document.querySelector('.aps-desktop-launcher')?.remove();
     document.querySelector('.aps-desktop-subnav')?.remove();
     document.querySelector('.aps-mobile-launcher')?.remove();
+    document.querySelector('.aps-mobile-more-launcher')?.remove();
     closeSuite();
     injectDemoAccounts(); applyShellPermissions(); applyRuntimePolish(); return;
   }
@@ -825,10 +826,17 @@ function injectLaunchers() {
       const subnav=document.createElement('div'); subnav.className='aps-desktop-subnav'; nav.append(subnav); renderDesktopPlanningSubnav();
     }
   }
-  if (!document.querySelector('.aps-mobile-launcher')) {
-    const actions = document.querySelector('.top-actions');
-    if (actions && !document.querySelector('.desktop-app')) {
-      const button = document.createElement('button'); button.className = 'aps-mobile-launcher'; button.setAttribute('aria-label','Apri Pianificazione'); button.innerHTML = `${navIcon('plan')}<i>PLAN</i>`; actions.prepend(button);
+  document.querySelector('.aps-mobile-launcher')?.remove();
+  if (!document.querySelector('.desktop-app') && !document.querySelector('.aps-mobile-more-launcher')) {
+    const title=[...document.querySelectorAll('.big.title-row')].find(item=>/^(Altro|More)$/i.test(item.textContent.trim()));
+    const list=title?.parentElement?.querySelector('.menu-list');
+    if(list){
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='aps-mobile-more-launcher';
+      button.setAttribute('aria-label','Apri Pianificazione');
+      button.innerHTML=`<span class="menu-icon">${navIcon('plan')}</span><span><b>Pianificazione</b><small>Piani, risorse, tempi e avanzamento</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>`;
+      list.append(button);
     }
   }
   injectDemoAccounts();
@@ -845,7 +853,7 @@ document.addEventListener('click', event => {
   const clicked=event.target.closest?.('button');
   if(clicked?.textContent.includes('Esci dalla demo')){closeSuite(false);history.replaceState(null,'','#/oggi');sessionStorage.removeItem(PROFILE_KEY);sessionStorage.removeItem(PROFILE_NAME_KEY);sessionStorage.removeItem('archea-planning-autopen');}
   if(clicked&&!clicked.closest('.aps-login-accounts')&&document.querySelector('.aps-login-accounts')&&['Francesco Diamanti','Alessandro Botrini','Lisandro Leyra','ARCHEA Property'].some(name=>clicked.textContent.includes(name))){sessionStorage.removeItem(PROFILE_KEY);sessionStorage.removeItem(PROFILE_NAME_KEY);}
-  if (event.target.closest?.('.aps-desktop-launcher,.aps-mobile-launcher')) {
+  if (event.target.closest?.('.aps-desktop-launcher,.aps-mobile-launcher,.aps-mobile-more-launcher')) {
     event.preventDefault();
     event.stopPropagation();
     const root=document.querySelector('#archea-planning-suite');

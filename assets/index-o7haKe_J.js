@@ -8999,7 +8999,7 @@ var lc = cu.exports,
   dp,
   wd = lc;
 (dp = wd.createRoot), wd.hydrateRoot;
-const xa = "0.12.1",
+const xa = "0.12.5",
   te = ({ children: t, size: n = 22 }) =>
     e.jsx("svg", {
       width: n,
@@ -18682,13 +18682,18 @@ function nv({ users: t, setUsers: n }) {
             {
               ...c,
               id: `demo-${Date.now()}`,
-              status: "invited",
-              lastAccess: "Invito inviato",
+              status: "active",
+              lastAccess: "Account appena creato",
               mfa: !1,
             },
           ]),
           d({ name: "", email: "", role: "architect", studio: "Firenze" }),
           o(!1));
+    },
+    removeUser = (j) => {
+      if (j.technicalRole) return;
+      n((f) => f.filter((g) => g.id !== j.id));
+      a(null);
     };
   return e.jsxs(e.Fragment, {
     children: [
@@ -18699,7 +18704,7 @@ function nv({ users: t, setUsers: n }) {
         action: e.jsx("button", {
           className: "dev-primary",
           onClick: () => o(!0),
-          children: "+ Invita utente",
+          children: "+ Aggiungi utente",
         }),
       }),
       e.jsxs("div", {
@@ -18921,6 +18926,12 @@ function nv({ users: t, setUsers: n }) {
               e.jsxs("div", {
                 className: "dev-modal-actions",
                 children: [
+                  !i.technicalRole &&
+                    e.jsx("button", {
+                      className: "dev-remove-user",
+                      onClick: () => removeUser(i),
+                      children: "Rimuovi utente",
+                    }),
                   e.jsx("button", {
                     onClick: () => a(null),
                     children: "Annulla",
@@ -18937,7 +18948,7 @@ function nv({ users: t, setUsers: n }) {
         }),
       l &&
         e.jsx(ho, {
-          title: "Invita nuovo utente",
+          title: "Aggiungi nuovo utente",
           subtitle: "Crea un account dimostrativo e assegna il ruolo iniziale",
           onClose: () => o(!1),
           children: e.jsxs("form", {
@@ -19001,7 +19012,7 @@ function nv({ users: t, setUsers: n }) {
                   e.jsx("button", {
                     className: "dev-primary",
                     type: "submit",
-                    children: "Invia invito demo",
+                    children: "Aggiungi utente demo",
                   }),
                 ],
               }),
@@ -26360,7 +26371,7 @@ function Ov() {
           ],
         }),
         e.jsx("div", {
-          className: "desk-table-wrap",
+          className: "desk-table-wrap desk-accounting-overview-table-wrap",
           children: e.jsxs("table", {
             className: "desk-table desk-account-projects",
             children: [
@@ -26554,7 +26565,7 @@ function Ov() {
       }),
       b.length
         ? e.jsx("div", {
-            className: "desk-table-wrap",
+            className: "desk-table-wrap desk-accounting-overview-table-wrap",
             children: e.jsxs("table", {
               className: "desk-table desk-accounting-overview-table",
               children: [
@@ -27489,6 +27500,16 @@ function _v() {
       textScale: 1,
     });
   lv(v.textScale);
+  C.useEffect(() => {
+    if (t.meta.source !== "excel") return;
+    const mergeBy = (V, Ee, Ve) => [
+      ...new Map([...V, ...Ee].map((At) => [At[Ve], At])).values(),
+    ];
+    c((V) => mergeBy(V, t.task, "id"));
+    u((V) => mergeBy(V, t.ore, "id"));
+    x((V) => mergeBy(V, t.note, "id"));
+    f((V) => mergeBy(V, t.progetti, "codice"));
+  }, [t.meta.loadedAt, t.meta.source]);
   const [p, y] = ke(
       "archea-desktop-calendar-events",
       Op.map((V, Ee) => {
@@ -27967,7 +27988,8 @@ function _v() {
                   }),
                   e.jsx("span", {
                     className: "desk-demo-label",
-                    children: "DATI DIMOSTRATIVI",
+                    children:
+                      t.meta.source === "excel" ? "DATI EXCEL" : "DATI DIMOSTRATIVI",
                   }),
                   e.jsx(Mv, {}),
                 ],
@@ -27976,7 +27998,20 @@ function _v() {
           }),
           e.jsx(
             "main",
-            { className: "desk-content desk-page-spring", children: R },
+            {
+              className: "desk-content desk-page-spring",
+              children: e.jsxs(e.Fragment, {
+                children: [
+                  nn.some(([V]) => V === ie) &&
+                    e.jsxs("button", {
+                      className: "desk-back desk-more-back",
+                      onClick: () => r("altro"),
+                      children: [e.jsx(Re, {}), "Torna ad Altro"],
+                    }),
+                  R,
+                ],
+              }),
+            },
             ie,
           ),
           e.jsxs("footer", {
@@ -28280,11 +28315,14 @@ function Bv() {
 }
 function Hv() {
   const { authenticated: t } = Y(),
-    [n, s] = C.useState(() => window.matchMedia("(min-width: 980px)").matches);
+    desktopDevice = () =>
+      window.matchMedia("(pointer: fine)").matches ||
+      window.screen.width >= 980,
+    [n, s] = C.useState(desktopDevice);
   return (
     C.useEffect(() => {
-      const r = window.matchMedia("(min-width: 980px)"),
-        i = () => s(r.matches);
+      const r = window.matchMedia("(pointer: fine)"),
+        i = () => s(desktopDevice());
       return (
         r.addEventListener("change", i),
         () => r.removeEventListener("change", i)
