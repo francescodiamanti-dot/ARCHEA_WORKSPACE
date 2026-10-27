@@ -8999,7 +8999,7 @@ var lc = cu.exports,
   dp,
   wd = lc;
 (dp = wd.createRoot), wd.hydrateRoot;
-const xa = "0.12.5",
+const xa = "0.13.2",
   te = ({ children: t, size: n = 22 }) =>
     e.jsx("svg", {
       width: n,
@@ -9557,11 +9557,11 @@ const Np = {
     in_scadenza: "⏰",
     in_lavorazione: "⚙️",
   },
-  Vx = (t) => !!(t.titolo.trim() || t.descrizione.trim());
+  Vx = (t) => !!((t.titolo || "").trim() || (t.descrizione || "").trim());
 function Ce(t, n) {
   return t.validated && t.completed && t.dataChiusura
     ? "validata"
-    : t.commenti.trim()
+    : (t.commenti || "").trim()
       ? "da_rivedere"
       : t.scadenza && t.scadenza < n
         ? "scaduta"
@@ -9791,6 +9791,7 @@ const Xt = {
     senior_architect: "Senior Architect",
     partner_architect: "Partner Architect",
     property: "Property",
+    reception: "Reception",
   },
   Vn = [
     {
@@ -9824,6 +9825,15 @@ const Xt = {
       demoPassword: "demo",
       ruolo: "membro",
       appRole: "property",
+      virtual: !0,
+    },
+    {
+      id: "alaurini",
+      nome: "Alessandra Laurini",
+      email: "alessandra.laurini@archea.it",
+      demoPassword: "demo",
+      ruolo: "membro",
+      appRole: "reception",
       virtual: !0,
     },
   ],
@@ -10494,6 +10504,7 @@ const Ld = {
       insights: "Insight",
       bimPortal: "BIM Portal",
       visualDepartment: "Visual",
+      packages: "Pacchi",
       language: "Lingua",
       demoData: "Dati dimostrativi",
       yourExcel: "Il tuo Excel",
@@ -10520,6 +10531,7 @@ const Ld = {
       insights: "Insights",
       bimPortal: "BIM Portal",
       visualDepartment: "Visual",
+      packages: "Parcels",
       language: "Language",
       demoData: "Demo data",
       yourExcel: "Your Excel",
@@ -13432,6 +13444,7 @@ function Aj() {
             ),
           ),
         }),
+      e.jsx(SiteMinutesDemo, { project: i, mobile: !0 }),
       f &&
         e.jsxs($t, {
           title: p ? "Choose active project" : "Scegli progetto attivo",
@@ -13948,6 +13961,7 @@ function Rj() {
     l = ["senior_architect", "partner_architect"].includes(
       s == null ? void 0 : s.appRole,
     ),
+    receptionOnly = (s == null ? void 0 : s.appRole) === "reception",
     o = [
       ...(l
         ? [
@@ -14003,7 +14017,28 @@ function Rj() {
         r ? "Report, events and polls" : "Report, eventi e sondaggi",
         va,
       ],
-    ];
+      [
+        "fornitori",
+        r ? "Suppliers" : "Fornitori",
+        r ? "Companies, contacts and technical documents" : "Aziende, referenti, listini e schede tecniche",
+        Ss,
+      ],
+      [
+        "materioteca",
+        r ? "Material library" : "Materioteca",
+        r ? "Physical samples available in the studio" : "Catalogo dei campioni presenti nello studio",
+        ja,
+      ],
+      [
+        "abacotecnico",
+        r ? "Technical atlas" : "Abaco tecnico",
+        r ? "Built details, layers and suppliers" : "Dettagli costruiti, stratigrafie e fornitori",
+        wt,
+      ],
+    ],
+    visibleMoreItems = receptionOnly
+      ? o.filter(([c]) => ["prenota", "fornitori", "materioteca"].includes(c))
+      : o;
   return e.jsxs(e.Fragment, {
     children: [
       e.jsx("h1", {
@@ -14043,7 +14078,7 @@ function Rj() {
       }),
       e.jsx("div", {
         className: "menu-list",
-        children: o.map(([c, d, u, m]) =>
+        children: visibleMoreItems.map(([c, d, u, m]) =>
           e.jsxs(
             "button",
             {
@@ -17724,9 +17759,10 @@ const Ji = [
   },
 ];
 function Yj() {
-  const { close: t, language: n } = Y(),
+  const { close: t, language: n, viewer: viewer } = Y(),
     s = n === "en",
-    [r, i] = C.useState(!1);
+    [r, i] = C.useState(!1),
+    notifications = [...parcelNotifications(viewer), ...Ji];
   return e.jsxs($t, {
     title: s ? "Notifications" : "Notifiche",
     onClose: t,
@@ -17734,7 +17770,7 @@ function Yj() {
       e.jsxs("div", {
         className: "notification-summary",
         children: [
-          e.jsx("b", { children: Ji.filter((a) => a.unread).length }),
+          e.jsx("b", { children: notifications.filter((a) => a.unread).length }),
           e.jsx("span", {
             children: s
               ? "new studio updates"
@@ -17744,7 +17780,7 @@ function Yj() {
       }),
       e.jsx("div", {
         className: "notification-list",
-        children: Ji.map((a) =>
+        children: notifications.map((a) =>
           e.jsxs(
             "article",
             {
@@ -17754,7 +17790,9 @@ function Yj() {
                   className: "notification-type",
                   "aria-hidden": "true",
                   children:
-                    a.kind === "survey"
+                    a.kind === "parcel"
+                      ? e.jsx(wt, {})
+                      : a.kind === "survey"
                       ? e.jsx(mp, {})
                       : a.kind === "party"
                         ? e.jsx(va, {})
@@ -17764,7 +17802,11 @@ function Yj() {
                   children: [
                     e.jsx("small", {
                       children:
-                        a.kind === "survey"
+                        a.kind === "parcel"
+                          ? s
+                            ? "PARCEL"
+                            : "PACCO IN RECEPTION"
+                          : a.kind === "survey"
                           ? s
                             ? "SURVEY"
                             : "SONDAGGIO"
@@ -17776,8 +17818,8 @@ function Yj() {
                               ? "EVENT"
                               : "EVENTO",
                     }),
-                    e.jsx("b", { children: s ? a.titleEn : a.title }),
-                    e.jsx("p", { children: s ? a.detailEn : a.detail }),
+                    e.jsx("b", { children: s ? a.titleEn || a.title : a.title }),
+                    e.jsx("p", { children: s ? a.detailEn || a.detail : a.detail }),
                     a.kind === "survey" &&
                       e.jsx("button", {
                         className: `notification-action${r ? " answered" : ""}`,
@@ -18018,6 +18060,16 @@ const Bp = [
       people: !0,
       administration: !1,
     },
+    reception: {
+      label: "Reception",
+      projects: !1,
+      tasks: !0,
+      hours: !1,
+      site: !1,
+      accounting: !1,
+      people: !1,
+      administration: !1,
+    },
     platform_owner: {
       label: "Platform Owner",
       projects: !0,
@@ -18104,6 +18156,16 @@ const Bp = [
       studio: "Tutti gli studi",
       status: "active",
       lastAccess: "Ieri · 18:31",
+      mfa: !0,
+    },
+    {
+      id: "alaurini",
+      name: "Alessandra Laurini",
+      email: "alessandra.laurini@archea.it",
+      role: "reception",
+      studio: "Firenze · Reception",
+      status: "active",
+      lastAccess: "Oggi · 08:42",
       mfa: !0,
     },
     {
@@ -25014,7 +25076,7 @@ function Tv({ messages: t, setMessages: n }) {
     ],
   });
 }
-function Pv() {
+function Pv({ setTasks: onSetTasks = null }) {
   var m, x, j;
   const { data: t, viewer: n } = Y(),
     s = t.progetti.filter((f) => f.stato.toLowerCase() === "attivo"),
@@ -25213,6 +25275,15 @@ function Pv() {
             ],
           }),
         ],
+      }),
+      e.jsx(SiteMinutesDemo, {
+        project: r,
+        onApprove: (f) =>
+          onSetTasks &&
+          onSetTasks((g) => [
+            ...f.filter((b) => !g.some((v) => v.id === b.id)),
+            ...g,
+          ]),
       }),
     ],
   });
@@ -27338,6 +27409,88 @@ function Rv({ tasks: t, hours: n }) {
     ],
   });
 }
+const SupplierSeed = [
+  { id: "schueco", name: "Schüco Italia", mark: "S", category: "Facciate e serramenti", city: "Padova", website: "www.schueco.it", contact: "Giulia Ferri", email: "g.ferri@schueco-demo.it", phone: "+39 049 000 1840", projects: ["P51 · Viola Park", "M86 · Stadio Flaminio"], priceLists: ["Listino sistemi alluminio 2026.pdf"], sheets: ["AWS 75.SI+ · Scheda tecnica.pdf", "FWS 50 · Capitolato.pdf"], notes: "Sistemi in alluminio per involucri ad alte prestazioni." },
+  { id: "mapei", name: "Mapei", mark: "M", category: "Adesivi e impermeabilizzazioni", city: "Milano", website: "www.mapei.com", contact: "Lorenzo Villa", email: "l.villa@mapei-demo.it", phone: "+39 02 000 2210", projects: ["H05 · Stadio di Pisa", "P52 · Social Housing Firenze"], priceLists: ["Listino edilizia 2026.xlsx"], sheets: ["Mapelastic · Scheda tecnica.pdf", "Keraflex Maxi S1.pdf"], notes: "Prodotti per posa, protezione e impermeabilizzazione." },
+  { id: "florim", name: "Florim", mark: "F", category: "Pavimenti e rivestimenti", city: "Fiorano Modenese", website: "www.florim.com", contact: "Chiara Bassi", email: "c.bassi@florim-demo.it", phone: "+39 0536 000 811", projects: ["O80 · Milanello Training Center"], priceLists: ["Listino Contract 2026.pdf"], sheets: ["Buildtech 2.0 · Dati tecnici.pdf"], notes: "Superfici ceramiche per interni, esterni e facciate ventilate." },
+  { id: "agc", name: "AGC Glass Europe", mark: "AG", category: "Vetri", city: "Milano", website: "www.agc-yourglass.com", contact: "Marco Rinaldi", email: "m.rinaldi@agc-demo.it", phone: "+39 02 000 7650", projects: ["M86 · Stadio Flaminio", "P51 · Viola Park"], priceLists: ["Listino vetri speciali 2026.pdf"], sheets: ["Stopray Vision 50 · Scheda.pdf", "Stratobel Security.pdf"], notes: "Vetri selettivi, stratificati e soluzioni per facciate." },
+  { id: "iguzzini", name: "iGuzzini", mark: "iG", category: "Illuminazione", city: "Recanati", website: "www.iguzzini.com", contact: "Sara Conti", email: "s.conti@iguzzini-demo.it", phone: "+39 071 000 410", projects: ["P51 · Viola Park", "I04 · Capannoncino"], priceLists: ["Listino Professional 2026.pdf"], sheets: ["Laser Blade XS.pdf", "Linealuce Compact.pdf"], notes: "Apparecchi architetturali per interni, esterni e paesaggio." },
+];
+const MaterialSeed = [
+  { id: "mat-01", name: "Buildtech 2.0 Bone", category: "Pavimenti", material: "Ceramica", brand: "Florim", location: "M02 · Cassetto 04", tone: "sand", finish: "Naturale opaco", format: "60 × 120 cm", code: "BT20-BONE-60120", performance: "R10 · Gres porcellanato · 9 mm", notes: "Campione grande disponibile anche in formato 120 × 120 cm." },
+  { id: "mat-02", name: "Stopray Vision 50", category: "Vetri", material: "Vetro", brand: "AGC Glass Europe", location: "V01 · Rastrelliera 02", tone: "glass", finish: "Selettivo neutro", format: "Campione 30 × 30 cm", code: "SRV50-8-16-66.2", performance: "Ug 1,0 W/m²K · TL 49% · g 27%", notes: "Vetro camera dimostrativo con stratificato interno." },
+  { id: "mat-03", name: "Kvadrat Remix 3 · 123", category: "Tessili", material: "Stoffa", brand: "Kvadrat", location: "T03 · Raccoglitore 11", tone: "fabric", finish: "Intreccio melange", format: "Taglio 20 × 30 cm", code: "REMIX3-123", performance: "Martindale 100.000 · EN 1021", notes: "Tessuto per sedute e pannelli fonoassorbenti." },
+  { id: "mat-04", name: "AWS 75.SI+ Anodic Bronze", category: "Finestre", material: "Alluminio", brand: "Schüco Italia", location: "F01 · Telaio campioni", tone: "bronze", finish: "Anodizzato spazzolato", format: "Profilo 40 cm", code: "AWS75-BR-A6", performance: "Uf fino a 1,6 W/m²K · RC3", notes: "Nodo angolare e fermavetro inclusi nel campione." },
+  { id: "mat-05", name: "Rovere Europeo Naturale", category: "Pavimenti", material: "Legno", brand: "Listone Giordano", location: "M01 · Cassetto 09", tone: "wood", finish: "Spazzolato olio naturale", format: "14 × 190 × 1200 mm", code: "LG-ROV-NAT-19", performance: "Classe 1 · posa incollata", notes: "Campione con scheda di manutenzione e certificazione FSC." },
+  { id: "mat-06", name: "Travertino Silver Vein Cut", category: "Rivestimenti", material: "Pietra", brand: "Margraf", location: "P02 · Ripiano 03", tone: "stone", finish: "Levigato", format: "30 × 60 × 2 cm", code: "TR-SV-LV", performance: "Uso interno/esterno protetto", notes: "Campione con trattamento idro-oleorepellente." },
+];
+const TechnicalSeed = [
+  { id: "vp-b", project: "P51", title: "Padiglione B · Copertura", subtitle: "Viola Park · Bagno a Ripoli", theme: "roof", points: [
+    { id: "skylight", x: 31, y: 32, label: "Lucernario continuo", supplier: "Schüco Italia", layers: ["Vetro stratificato selettivo", "Telaio alluminio a taglio termico", "Controtelaio coibentato", "Scossalina in alluminio"], detail: "Nodo apribile motorizzato per ventilazione e controllo fumi.", photos: ["Cantiere · posa controtelaio", "Opera finita · vista interna"] },
+    { id: "green", x: 58, y: 48, label: "Copertura verde", supplier: "Harpo Seic", layers: ["Sedum estensivo", "Substrato 10 cm", "Elemento drenante", "Guaina antiradice", "Isolamento XPS"], detail: "Sistema estensivo a bassa manutenzione con troppo pieno ispezionabile.", photos: ["Cantiere · stesura drenante", "Opera finita · vista copertura"] },
+    { id: "parapet", x: 79, y: 35, label: "Parapetto perimetrale", supplier: "AGC Glass Europe", layers: ["Vetro 10+10 temperato stratificato", "Profilo continuo incassato", "Carter alluminio verniciato"], detail: "Parapetto vetrato continuo con fissaggio nascosto.", photos: ["Mock-up · profilo incassato", "Opera finita · bordo copertura"] },
+  ]},
+  { id: "flaminio", project: "M86", title: "Museo Flaminio · Involucro", subtitle: "Stadio Flaminio · Roma", theme: "museum", points: [
+    { id: "glasswall", x: 38, y: 44, label: "Vetrata panoramica", supplier: "AGC Glass Europe", layers: ["Vetro extraclear stratificato", "Camera 18 mm", "Lastra selettiva esterna", "Montante minimale"], detail: "Vetrata orientata verso il Palazzetto dello Sport di Pier Luigi Nervi.", photos: ["Mock-up · giunto verticale", "Vista finita · museo"] },
+    { id: "light", x: 68, y: 63, label: "Luce lineare intradosso", supplier: "iGuzzini", layers: ["Profilo LED 3000 K", "Diffusore opale", "Canale tecnico ispezionabile"], detail: "Illuminazione indiretta continua sotto l’intradosso delle travi.", photos: ["Prova luce · 3000 K", "Opera finita · sala espositiva"] },
+  ]},
+];
+const ParcelSeed = [
+  { id: "pk-101", courier: "Amazon Business", tracking: "AMZ-847215", recipient: "Francesco Diamanti", arrivedAt: "27/10/2026 · 10:42", status: "waiting", note: "Scatola media · reception Firenze" },
+  { id: "pk-102", courier: "DHL", tracking: "DHL-550981", recipient: "Lisandro Leyra", arrivedAt: "27/10/2026 · 11:18", status: "waiting", note: "Busta documenti" },
+  { id: "pk-103", courier: "Amazon", tracking: "AMZ-770341", recipient: "Alessandro Botrini", arrivedAt: "26/10/2026 · 16:05", status: "delivered", note: "Consegnato alle 17:20" },
+];
+const MinutesTasks = [
+  { id: "minute-1", project: "P51", title: "Verificare quota davanzali facciata nord", owner: "Alessandro Botrini", priority: "Alta", due: "2026-10-30" },
+  { id: "minute-2", project: "P51", title: "Inviare dettaglio impermeabilizzazione lucernari", owner: "Lisandro Leyra", priority: "Alta", due: "2026-10-29" },
+  { id: "minute-3", project: "P51", title: "Confermare campione finitura parapetto", owner: "Francesco Diamanti", priority: "Media", due: "2026-11-03" },
+  { id: "minute-4", project: "P51", title: "Aggiornare tavola copertura con troppo pieno", owner: "Lisandro Leyra", priority: "Media", due: "2026-11-04" },
+];
+const canEditStudioTools = (t) => ["senior_architect", "partner_architect", "property"].includes(t == null ? void 0 : t.appRole);
+function StudioToolHeading({ title: t, subtitle: n, action: s = null, eyebrow: r = "ARCHEA WORKSPACE", back: a = !0 }) {
+  const { setTab: i } = Y();
+  return e.jsxs(e.Fragment, { children: [a && e.jsxs("button", { className: "studio-tool-mobile-back", onClick: () => i("altro"), children: [e.jsx(Re, {}), "Torna ad Altro"] }), e.jsxs("div", { className: "studio-tool-heading", children: [e.jsxs("div", { children: [e.jsx("small", { children: r }), e.jsx("h1", { children: t }), e.jsx("p", { children: n })] }), s] })] });
+}
+function SupplierDetail({ supplier: t, editable: n, onClose: s, onSave: r }) {
+  const [i, a] = C.useState(t), [l, o] = C.useState(!1);
+  return e.jsx(De, { title: i.name, subtitle: `${i.category} · ${i.city}`, onClose: s, wide: !0, children: e.jsxs("div", { className: "supplier-detail", children: [
+    e.jsxs("section", { className: "supplier-identity", children: [e.jsx("span", { className: "supplier-logo large", children: i.mark }), e.jsxs("div", { children: [e.jsx("small", { children: "AZIENDA" }), e.jsx("h3", { children: i.name }), e.jsx("p", { children: i.notes })] }), n && e.jsx("button", { className: "desk-small-button", onClick: () => o(!l), children: l ? "Fine modifica" : "Modifica" })] }),
+    l ? e.jsxs("div", { className: "studio-edit-grid", children: [e.jsxs("label", { children: ["Referente", e.jsx("input", { value: i.contact, onChange: c => a({ ...i, contact: c.target.value }) })] }), e.jsxs("label", { children: ["Email", e.jsx("input", { value: i.email, onChange: c => a({ ...i, email: c.target.value }) })] }), e.jsxs("label", { children: ["Telefono", e.jsx("input", { value: i.phone, onChange: c => a({ ...i, phone: c.target.value }) })] }), e.jsxs("label", { className: "wide", children: ["Note", e.jsx("textarea", { value: i.notes, onChange: c => a({ ...i, notes: c.target.value }) })] }), e.jsx("button", { className: "desk-primary", onClick: () => { r(i); o(!1); }, children: "Salva aggiornamenti" })] }) : e.jsxs("div", { className: "supplier-info-grid", children: [e.jsxs("article", { children: [e.jsx("small", { children: "REFERENTE" }), e.jsx("b", { children: i.contact }), e.jsx("span", { children: i.email }), e.jsx("span", { children: i.phone })] }), e.jsxs("article", { children: [e.jsx("small", { children: "SEDE E WEB" }), e.jsx("b", { children: i.city }), e.jsx("span", { children: i.website })] })] }),
+    e.jsxs("div", { className: "studio-detail-columns", children: [e.jsxs("section", { children: [e.jsx("h3", { children: "Progetti in cui è stata utilizzata" }), i.projects.map(c => e.jsx("span", { className: "studio-doc-row", children: c }, c))] }), e.jsxs("section", { children: [e.jsx("h3", { children: "Listini aggiornati" }), i.priceLists.map(c => e.jsxs("button", { className: "studio-doc-row", children: [e.jsx(wt, {}), c, e.jsx("em", { children: "Apri" })] }, c))] }), e.jsxs("section", { children: [e.jsx("h3", { children: "Schede tecniche" }), i.sheets.map(c => e.jsxs("button", { className: "studio-doc-row", children: [e.jsx(wt, {}), c, e.jsx("em", { children: "PDF" })] }, c))] })] })
+  ] }) });
+}
+function SuppliersDemo() {
+  const { viewer: t } = Y(), n = canEditStudioTools(t), [s, r] = ke("archea-demo-suppliers-v1", SupplierSeed), [i, a] = C.useState("all"), [l, o] = C.useState(null), c = [...new Set(s.map(d => d.category))], u = i === "all" ? s : s.filter(d => d.category === i);
+  const m = () => { const d = { ...SupplierSeed[0], id: en("supplier"), name: "Nuovo fornitore", mark: "NF", projects: [], priceLists: [], sheets: [], contact: "Da compilare", email: "", phone: "", notes: "Scheda demo appena creata." }; r(f => [d, ...f]); o(d.id); };
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Fornitori", subtitle: n ? "Archivio contatti, progetti, listini e schede tecniche. Puoi aggiornare le schede demo." : "Archivio consultabile di aziende e referenti dello studio.", action: n ? e.jsxs("button", { className: "desk-primary", onClick: m, children: [e.jsx(tt, {}), "Aggiungi fornitore"] }) : e.jsx("span", { className: "read-only-badge", children: "Sola lettura" }) }), e.jsx("div", { className: "studio-tool-filter", children: e.jsx(fe, { label: "Categoria", value: i, onChange: a, options: [{ value: "all", label: "Tutte le categorie", meta: `${s.length} aziende` }, ...c.map(d => ({ value: d, label: d }))] }) }), e.jsx("div", { className: "supplier-grid", children: u.map(d => e.jsxs("article", { className: "supplier-card", children: [e.jsx("button", { className: "supplier-logo", onClick: () => o(d.id), "aria-label": `Apri ${d.name}`, children: d.mark }), e.jsxs("div", { children: [e.jsx("small", { children: d.category }), e.jsx("h2", { children: d.name }), e.jsx("p", { children: d.notes }), e.jsxs("span", { children: [d.contact, " · ", d.city] })] }), e.jsx("button", { className: "supplier-open", onClick: () => o(d.id), children: "Apri scheda" })] }, d.id)) }), l && e.jsx(SupplierDetail, { supplier: s.find(d => d.id === l), editable: n, onClose: () => o(null), onSave: d => r(f => f.map(g => g.id === d.id ? d : g)) })] });
+}
+function MaterialDetail({ item: t, editable: n, onClose: s, onSave: r }) {
+  const [i, a] = C.useState(t), [l, o] = C.useState(!1);
+  return e.jsx(De, { title: i.name, subtitle: `${i.brand} · ${i.category}`, onClose: s, wide: !0, children: e.jsxs("div", { className: "material-detail", children: [e.jsx("div", { className: `material-preview large ${i.tone}`, children: e.jsx("span", { children: i.code }) }), e.jsxs("div", { className: "material-detail-copy", children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "CAMPIONE MATERIOTECA" }), e.jsx("h3", { children: i.name }), e.jsx("p", { children: i.notes })] }), n && e.jsx("button", { className: "desk-small-button", onClick: () => o(!l), children: l ? "Annulla" : "Modifica" })] }), l ? e.jsxs("div", { className: "studio-edit-grid", children: [e.jsxs("label", { children: ["Posizione", e.jsx("input", { value: i.location, onChange: c => a({ ...i, location: c.target.value }) })] }), e.jsxs("label", { children: ["Finitura", e.jsx("input", { value: i.finish, onChange: c => a({ ...i, finish: c.target.value }) })] }), e.jsxs("label", { className: "wide", children: ["Note", e.jsx("textarea", { value: i.notes, onChange: c => a({ ...i, notes: c.target.value }) })] }), e.jsx("button", { className: "desk-primary", onClick: () => { r(i); o(!1); }, children: "Salva campione" })] }) : e.jsxs("div", { className: "material-spec-grid", children: [["Azienda", i.brand], ["Materiale", i.material], ["Finitura", i.finish], ["Formato", i.format], ["Prestazioni", i.performance], ["Posizione in materioteca", i.location]].map(([c,d]) => e.jsxs("article", { children: [e.jsx("small", { children: c }), e.jsx("b", { children: d })] }, c)) })] })] }) });
+}
+function MaterialsDemo() {
+  const { viewer: t } = Y(), n = canEditStudioTools(t), [s, r] = ke("archea-demo-materials-v1", MaterialSeed), [i, a] = C.useState("all"), [l, o] = C.useState("all"), [c, d] = C.useState("all"), [u, m] = C.useState(null), x = [...new Set(s.map(g => g.category))], j = [...new Set(s.map(g => g.material))], f = [...new Set(s.map(g => g.brand))], b = s.filter(g => (i === "all" || g.category === i) && (l === "all" || g.material === l) && (c === "all" || g.brand === c));
+  const v = () => { const g = { ...MaterialSeed[0], id: en("material"), name: "Nuovo campione", code: "DA-COMPILARE", location: "Da assegnare", notes: "Campione aggiunto nella demo." }; r(h => [g, ...h]); m(g.id); };
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Materioteca", subtitle: "Catalogo digitale dei campioni fisici disponibili nello studio.", action: n ? e.jsxs("button", { className: "desk-primary", onClick: v, children: [e.jsx(tt, {}), "Aggiungi campione"] }) : e.jsx("span", { className: "read-only-badge", children: "Sola lettura" }) }), e.jsxs("div", { className: "studio-tool-filters", children: [e.jsx(fe, { label: "Categoria", value: i, onChange: a, options: [{ value: "all", label: "Tutte le categorie" }, ...x.map(g => ({ value: g, label: g }))] }), e.jsx(fe, { label: "Materiale", value: l, onChange: o, options: [{ value: "all", label: "Tutti i materiali" }, ...j.map(g => ({ value: g, label: g }))] }), e.jsx(fe, { label: "Azienda", value: c, onChange: d, options: [{ value: "all", label: "Tutte le aziende" }, ...f.map(g => ({ value: g, label: g }))] })] }), e.jsx("div", { className: "material-grid", children: b.map(g => e.jsxs("button", { className: "material-card", onClick: () => m(g.id), children: [e.jsx("span", { className: `material-preview ${g.tone}`, children: e.jsx("small", { children: g.code }) }), e.jsxs("span", { children: [e.jsx("small", { children: `${g.category} · ${g.material}` }), e.jsx("b", { children: g.name }), e.jsx("em", { children: g.brand }), e.jsx("i", { children: g.location })] })] }, g.id)) }), !b.length && e.jsx("p", { className: "desk-empty", children: "Nessun materiale corrisponde ai filtri." }), u && e.jsx(MaterialDetail, { item: s.find(g => g.id === u), editable: n, onClose: () => m(null), onSave: g => r(h => h.map(p => p.id === g.id ? g : p)) })] });
+}
+function TechnicalAtlasDemo() {
+  const [t, n] = C.useState(TechnicalSeed[0].id), [s, r] = C.useState(null), i = TechnicalSeed.find(o => o.id === t), a = i == null ? void 0 : i.points.find(o => o.id === s);
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Abaco tecnico", subtitle: "Dettagli costruiti, stratigrafie, fornitori e fotografie delle opere realizzate." }), e.jsx("div", { className: "studio-tool-filter", children: e.jsx(fe, { label: "Progetto e dettaglio", value: t, onChange: n, searchable: !0, options: TechnicalSeed.map(o => ({ value: o.id, label: o.title, meta: o.subtitle })) }) }), e.jsxs("section", { className: "technical-atlas", children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: i.project }), e.jsx("h2", { children: i.title }), e.jsx("p", { children: i.subtitle })] }), e.jsx("span", { children: `${i.points.length} punti tecnici` })] }), e.jsx("div", { className: `technical-image ${i.theme}`, children: [e.jsxs("div", { className: "technical-scene", children: [e.jsx("span", { className: "scene-line one" }), e.jsx("span", { className: "scene-line two" }), e.jsx("span", { className: "scene-line three" })] }), i.points.map((o,c) => e.jsxs("button", { className: "technical-hotspot", style: { left: `${o.x}%`, top: `${o.y}%` }, onClick: () => r(o.id), children: [e.jsx("i", { children: c + 1 }), e.jsx("span", { children: o.label })] }, o.id))] }), e.jsx("footer", { children: "Clicca sui punti numerati per aprire il dettaglio tecnico." })] }), a && e.jsx(De, { title: a.label, subtitle: `${i.title} · ${a.supplier}`, onClose: () => r(null), wide: !0, children: e.jsxs("div", { className: "technical-detail", children: [e.jsxs("section", { children: [e.jsx("small", { children: "DESCRIZIONE" }), e.jsx("p", { children: a.detail }), e.jsx("b", { children: `Fornitore: ${a.supplier}` })] }), e.jsxs("section", { children: [e.jsx("h3", { children: "Stratigrafia" }), e.jsx("ol", { children: a.layers.map(o => e.jsx("li", { children: o }, o)) })] }), e.jsxs("section", { children: [e.jsx("h3", { children: "Immagini di riferimento" }), e.jsx("div", { className: "technical-photo-grid", children: a.photos.map((o,c) => e.jsxs("article", { children: [e.jsx("span", { className: `technical-photo ph-${c + 1}` }), e.jsx("b", { children: o })] }, o)) })] })] }) })] });
+}
+function useDemoParcels() { return ke("archea-demo-reception-parcels-v1", ParcelSeed); }
+function parcelNotifications(t) { let n = ParcelSeed; try { n = JSON.parse(localStorage.getItem("archea-demo-reception-parcels-v1") || JSON.stringify(ParcelSeed)); } catch {} return n.filter(s => s.status === "waiting" && s.recipient === (t == null ? void 0 : t.nome)).map(s => ({ id: `parcel-${s.id}`, kind: "parcel", title: "È arrivato un pacco per te", detail: `${s.courier} · ${s.tracking} · Ritiralo alla reception`, unread: !0 })); }
+function ReceptionTodayDemo() {
+  const [t] = useDemoParcels(), n = t.filter(s => s.status === "waiting").length;
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Reception · Oggi", subtitle: "Attività di segreteria, arrivi, riunioni e spazi da preparare.", eyebrow: "ARCHEA WORKSPACE · RECEPTION" }), e.jsxs("div", { className: "desk-stats reception-stats", children: [e.jsx(Q, { label: "Pacchi da consegnare", value: n, tone: n ? "warn" : "" }), e.jsx(Q, { label: "Riunioni oggi", value: 4 }), e.jsx(Q, { label: "Sale da preparare", value: 2 }), e.jsx(Q, { label: "Visitatori attesi", value: 7 })] }), e.jsxs("div", { className: "reception-grid", children: [e.jsxs("section", { className: "desk-panel", children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "AGENDA RECEPTION" }), e.jsx("h2", { children: "Prossime attività" })] }), e.jsx("span", { children: "27 ottobre" })] }), e.jsx("div", { className: "reception-timeline", children: [["09:30", "Allestire Sala Lungarno", "Riunione P51 · 10 persone", "done"], ["11:00", "Accoglienza consulenti impianti", "Studio MEP · appuntamento con Alessandro", "active"], ["14:30", "Preparare Sala Cellini", "Call Milanello · collegamento Teams", ""], ["17:00", "Ritiro corriere espresso", "3 buste documenti da spedire", ""]].map(([s,r,i,a]) => e.jsxs("article", { className: a, children: [e.jsx("time", { children: s }), e.jsxs("span", { children: [e.jsx("b", { children: r }), e.jsx("small", { children: i })] }), e.jsx("i", {})] }, s)) })] }), e.jsxs("section", { className: "desk-panel", children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "SALE RIUNIONI" }), e.jsx("h2", { children: "Stato preparazione" })] }), e.jsx("span", { children: "Oggi" })] }), e.jsx("div", { className: "reception-rooms", children: [["Sala Lungarno", "Pronta", "10:00 · Riunione P51"], ["Sala Cellini", "Da preparare", "14:30 · Milanello"], ["Sala Ingresso", "Libera", "Nessun evento"]].map(([s,r,i]) => e.jsxs("article", { children: [e.jsx("span", { className: `room-state ${r === "Pronta" ? "ready" : r === "Da preparare" ? "prepare" : "free"}` }), e.jsxs("div", { children: [e.jsx("b", { children: s }), e.jsx("small", { children: i })] }), e.jsx("em", { children: r })] }, s)) })] })] })] });
+}
+function PackagesDemo() {
+  const [t,n] = useDemoParcels(), [s,r] = C.useState("all"), [i,a] = C.useState(!1), [l,o] = C.useState({ courier: "Amazon Business", tracking: "", recipient: "Lisandro Leyra", note: "" }), c = s === "all" ? t : t.filter(m => m.status === s), d = (m,x) => n(j => j.map(f => f.id === m ? { ...f, status: x, note: x === "delivered" ? "Consegnato dalla reception" : f.note } : f)), u = m => { m.preventDefault(); n(x => [{ id: en("parcel"), ...l, arrivedAt: new Date().toLocaleString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }), status: "waiting" }, ...x]); a(!1); o({ courier: "Amazon Business", tracking: "", recipient: "Lisandro Leyra", note: "" }); };
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Pacchi e corrieri", subtitle: "Registra gli arrivi, notifica il destinatario e controlla i pacchi ancora da ritirare.", eyebrow: "ARCHEA WORKSPACE · RECEPTION", action: e.jsxs("button", { className: "desk-primary", onClick: () => a(!0), children: [e.jsx(tt, {}), "Registra pacco"] }) }), e.jsx("div", { className: "studio-tool-filter", children: e.jsx(fe, { label: "Stato consegna", value: s, onChange: r, options: [{ value: "all", label: "Tutti gli stati", meta: `${t.length} pacchi` }, { value: "waiting", label: "In attesa di ritiro", meta: `${t.filter(m => m.status === "waiting").length} pacchi` }, { value: "delivered", label: "Consegnati", meta: `${t.filter(m => m.status === "delivered").length} pacchi` }] }) }), e.jsx("div", { className: "package-table-wrap", children: e.jsxs("table", { className: "desk-table package-table", children: [e.jsx("thead", { children: e.jsxs("tr", { children: ["Corriere / tracking", "Destinatario", "Arrivato", "Note", "Stato"].map(m => e.jsx("th", { children: m }, m)) }) }), e.jsx("tbody", { children: c.map(m => e.jsxs("tr", { children: [e.jsxs("td", { children: [e.jsx("b", { children: m.courier }), e.jsx("small", { children: m.tracking })] }), e.jsx("td", { children: e.jsxs("span", { className: "desk-person", children: [e.jsx("i", { children: Lt(m.recipient) }), m.recipient] }) }), e.jsx("td", { children: m.arrivedAt }), e.jsx("td", { children: m.note || "—" }), e.jsx("td", { children: e.jsx("button", { className: `parcel-status ${m.status}`, onClick: () => d(m.id, m.status === "waiting" ? "delivered" : "waiting"), children: m.status === "waiting" ? "In attesa" : "Consegnato" }) })] }, m.id)) })] }) }), i && e.jsx(De, { title: "Registra nuovo pacco", subtitle: "Il destinatario riceverà una notifica nell’app.", onClose: () => a(!1), children: e.jsxs("form", { className: "studio-edit-grid", onSubmit: u, children: [e.jsxs("label", { children: ["Corriere", e.jsx("input", { value: l.courier, onChange: m => o({ ...l, courier: m.target.value }), required: !0 })] }), e.jsxs("label", { children: ["Tracking", e.jsx("input", { value: l.tracking, onChange: m => o({ ...l, tracking: m.target.value }), required: !0 })] }), e.jsxs("label", { className: "wide", children: ["Destinatario", e.jsx("select", { value: l.recipient, onChange: m => o({ ...l, recipient: m.target.value }), children: ["Francesco Diamanti", "Alessandro Botrini", "Lisandro Leyra", "Alessandra Laurini"].map(m => e.jsx("option", { value: m, children: m }, m)) })] }), e.jsxs("label", { className: "wide", children: ["Note", e.jsx("input", { value: l.note, onChange: m => o({ ...l, note: m.target.value }) })] }), e.jsx("button", { className: "desk-primary", type: "submit", children: "Registra e invia notifica" })] }) })] });
+}
+function SiteMinutesDemo({ project: t = "P51", onApprove: n = null, mobile: s = !1 }) {
+  const [r,i] = C.useState(MinutesTasks.map(d => d.id)), [a,l] = C.useState(!1), [o,c] = C.useState("Riunione_cantiere_P51_27-10-2026.m4a"), d = () => { const u = MinutesTasks.filter(m => r.includes(m.id)).map((m,x) => ({ id: `${m.project}-AI-${String(Date.now() + x).slice(-4)}`, numero: `${m.project}-AI-${String(x + 1).padStart(2, "0")}`, progettoCodice: m.project, titolo: m.title, descrizione: m.title, assegnatario: m.owner, priorita: m.priority, inizio: "2026-10-27", scadenza: m.due, orario: "18:00", tipologia: "Verbale cantiere AI", commenti: "", linkServer: `Verbale ${o}`, shared: !0, completed: !1, validated: !1, notValidated: !1 })); n ? n(u) : localStorage.setItem("archea-ai-minutes-tasks", JSON.stringify(u)); l(!0); window.dispatchEvent(new CustomEvent("archea-ai-minutes-approved", { detail: u })); };
+  return e.jsxs("section", { className: `site-minutes-ai${s ? " mobile" : ""}`, children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "ARCHEAI · VERBALE DI CANTIERE" }), e.jsx("h2", { children: "Da registrazione a task operative" }), e.jsx("p", { children: "Carica l’audio o la trascrizione: la demo produce un riepilogo e propone le attività da validare." })] }), e.jsxs("label", { className: "desk-primary", children: [e.jsx(oc, {}), "Carica verbale", e.jsx("input", { type: "file", accept: "audio/*,.txt,.doc,.docx", hidden: !0, onChange: u => { var m; const x = (m = u.target.files) == null ? void 0 : m[0]; x && c(x.name); } })] })] }), e.jsxs("div", { className: "minutes-source", children: [e.jsx("span", { children: "AI" }), e.jsxs("div", { children: [e.jsx("b", { children: o }), e.jsx("small", { children: "Trascrizione completata · 18 min 42 sec · 4 interlocutori" })] }), e.jsx("em", { children: "DEMO" })] }), e.jsxs("div", { className: "minutes-summary", children: [e.jsx("h3", { children: "Riassunto della riunione" }), e.jsx("p", { children: "Il sopralluogo ha confermato l’avanzamento della copertura del Padiglione B. Prima della posa definitiva dei lucernari devono essere verificati i davanzali della facciata nord e il raccordo dell’impermeabilizzazione. La Direzione Lavori richiede inoltre il campione colore del parapetto e l’aggiornamento della tavola con il troppo pieno della copertura verde." }), e.jsx("div", { children: ["Copertura verde: posa prevista dal 3 novembre", "Lucernari: dettaglio da approvare prima dell’ordine", "Parapetto: finitura bronzo da confermare", "Prossimo sopralluogo: 6 novembre · ore 10:00"].map(u => e.jsx("span", { children: u }, u)) })] }), e.jsxs("div", { className: "minutes-task-head", children: [e.jsxs("div", { children: [e.jsx("h3", { children: "Task estratte dall’AI" }), e.jsxs("p", { children: [r.length, " di ", MinutesTasks.length, " selezionate"] })] }), e.jsx("button", { className: "desk-primary", disabled: !r.length || a, onClick: d, children: a ? "Task inserite nel Task Manager" : "Valida e invia al Task Manager" })] }), e.jsx("div", { className: "minutes-task-list", children: MinutesTasks.map(u => e.jsxs("label", { className: r.includes(u.id) ? "selected" : "", children: [e.jsx("input", { type: "checkbox", checked: r.includes(u.id), onChange: () => i(m => m.includes(u.id) ? m.filter(x => x !== u.id) : [...m, u.id]) }), e.jsxs("span", { children: [e.jsx("b", { children: u.title }), e.jsxs("small", { children: [u.project, " · ", u.owner, " · scadenza ", u.due] })] }), e.jsx("em", { className: u.priority.toLowerCase(), children: u.priority })] }, u.id)) })] });
+}
 function Mv() {
   const [t, n] = C.useState(null),
     [s, r] = C.useState(!1),
@@ -27510,6 +27663,38 @@ function _v() {
     x((V) => mergeBy(V, t.note, "id"));
     f((V) => mergeBy(V, t.progetti, "codice"));
   }, [t.meta.loadedAt, t.meta.source]);
+  C.useEffect(() => {
+    const mergeMinutes = (V) => {
+      if (!Array.isArray(V) || !V.length) return;
+      c((Ee) => [...V.filter((Ve) => !Ee.some((At) => At.id === Ve.id)), ...Ee]);
+    };
+    try {
+      mergeMinutes(JSON.parse(localStorage.getItem("archea-ai-minutes-tasks") || "[]"));
+    } catch {}
+    const onMinutes = (V) => mergeMinutes(V.detail);
+    window.addEventListener("archea-ai-minutes-approved", onMinutes);
+    return () => window.removeEventListener("archea-ai-minutes-approved", onMinutes);
+  }, []);
+  C.useEffect(() => {
+    c((V) =>
+      V.map((Ee, Ve) =>
+        String(Ee.id || "").includes("-AI-")
+          ? {
+              commenti: "",
+              descrizione: Ee.titolo || "",
+              inizio: "2026-10-27",
+              orario: "18:00",
+              shared: !0,
+              notValidated: !1,
+              numero: `${Ee.progettoCodice || "TASK"}-AI-${String(Ve + 1).padStart(2, "0")}`,
+              ...Ee,
+              commenti: Ee.commenti || "",
+              numero: Ee.numero || `${Ee.progettoCodice || "TASK"}-AI-${String(Ve + 1).padStart(2, "0")}`,
+            }
+          : Ee,
+      ),
+    );
+  }, []);
   const [p, y] = ke(
       "archea-desktop-calendar-events",
       Op.map((V, Ee) => {
@@ -27549,6 +27734,7 @@ function _v() {
   }, [$]);
   const A = ["senior_architect", "partner_architect"].includes(n.appRole),
     w = n.appRole === "property",
+    Reception = n.appRole === "reception",
     B = [
       ...o
         .filter((V) => V.approvalPending && V.projectLeadId === n.id)
@@ -27584,6 +27770,7 @@ function _v() {
           unread: !0,
           taskId: V.id,
         })),
+      ...parcelNotifications(n),
     ],
     T = v.notifications === !1 ? [] : [...B, ...Ji],
     D = [
@@ -27621,6 +27808,9 @@ function _v() {
       ["bim", "BIM Portal", ga, "Guide Revit e standard condivisi"],
       ["visual", "Visual Department", ya, "Richieste render e consegne"],
       ["inarchea", "IN ARCHEA", va, "Report, eventi e sondaggi"],
+      ["fornitori", "Fornitori", Ss, "Aziende, referenti, listini e schede"],
+      ["materioteca", "Materioteca", ja, "Catalogo dei campioni dello studio"],
+      ["abacotecnico", "Abaco tecnico", wt, "Dettagli costruiti e stratigrafie"],
     ],
     X = [
       ["avanzamento", "Avanzamento", Ss, "Studi, commesse e gruppi"],
@@ -27629,9 +27819,23 @@ function _v() {
       ["calendario", "Calendario", Wt, "Agenda e appuntamenti"],
       ["chat", "Chat", Td, "Messaggi interni"],
       ["bio", "Organico", Xn, "Anagrafica e contratti"],
+      ["fornitori", "Fornitori", Ss, "Aziende, referenti, listini e schede"],
+      ["materioteca", "Materioteca", ja, "Catalogo dei campioni dello studio"],
+      ["abacotecnico", "Abaco tecnico", wt, "Dettagli costruiti e stratigrafie"],
     ],
-    M = w ? X : D,
-    q = w
+    ReceptionCatalog = [
+      ["oggi", "Oggi", bx, "Agenda operativa della reception"],
+      ["pacchi", "Pacchi", wt, "Arrivi, notifiche e consegne"],
+      ["calendario", "Calendario", Wt, "Riunioni e sale da preparare"],
+      ["chat", "Chat", Td, "Messaggi interni dello studio"],
+      ["prenota", "Prenotazioni", Wt, "Auto, materiali e sale"],
+      ["fornitori", "Fornitori", Ss, "Rubrica aziende in sola lettura"],
+      ["materioteca", "Materioteca", ja, "Catalogo campioni in sola lettura"],
+    ],
+    M = Reception ? ReceptionCatalog : w ? X : D,
+    q = Reception
+      ? ["oggi", "pacchi", "calendario", "chat"]
+      : w
       ? X.map((V) => V[0])
       : [
           "oggi",
@@ -27671,14 +27875,18 @@ function _v() {
       ([V]) => V === ie || (V === "altro" && nn.some((Ee) => Ee[0] === ie)),
     ),
     R =
-      ie === "oggi"
+      Reception && ie === "oggi"
+        ? e.jsx(ReceptionTodayDemo, {})
+        : ie === "pacchi"
+          ? e.jsx(PackagesDemo, {})
+      : ie === "oggi"
         ? e.jsx(hv, { tasks: o, hours: d, projects: j })
         : ie === "taskmanager"
           ? e.jsx(pv, { tasks: o, setTasks: c, projects: j })
           : ie === "ore"
             ? e.jsx(mv, { hours: d, setHours: u })
             : ie === "cantiere"
-              ? e.jsx(Pv, {})
+              ? e.jsx(Pv, { setTasks: c })
               : ie === "insight"
                 ? e.jsx(Rv, { tasks: o, hours: d })
                 : ie === "progetti"
@@ -27710,7 +27918,13 @@ function _v() {
                                       ? e.jsx(kv, {})
                                       : ie === "inarchea"
                                         ? e.jsx(bv, {})
-                                        : ie === "developer" && n.isDeveloper
+                        : ie === "fornitori"
+                          ? e.jsx(SuppliersDemo, {})
+                          : ie === "materioteca"
+                            ? e.jsx(MaterialsDemo, {})
+                            : ie === "abacotecnico"
+                              ? e.jsx(TechnicalAtlasDemo, {})
+                        : ie === "developer" && n.isDeveloper
                                           ? e.jsx(av, {})
                                           : e.jsx(gv, {
                                               items: nn.map(
@@ -28087,6 +28301,12 @@ const $v = [
     ["insight", "insights", xp],
     ["calendario", "calendar", Wt],
     ["bio", "employeeBio", Xn],
+  ],
+  ReceptionMobile = [
+    ["oggi", "today", Wt],
+    ["pacchi", "packages", wt],
+    ["calendario", "calendar", Wt],
+    ["altro", "more", dc],
   ];
 function Vv() {
   const {
@@ -28107,9 +28327,14 @@ function Vv() {
       n == null ? void 0 : n.appRole,
     ),
     j = (n == null ? void 0 : n.appRole) === "architect",
+    Reception = (n == null ? void 0 : n.appRole) === "reception",
     f = ["avanzamento", "contabilita", "insight", "calendario", "bio"],
     g = ["avanzamento", "bio"],
-    b = m
+    b = Reception
+      ? ["oggi", "pacchi", "calendario", "prenota", "fornitori", "materioteca"].includes(s)
+        ? s
+        : "oggi"
+      : m
       ? f.includes(s)
         ? s
         : "avanzamento"
@@ -28117,10 +28342,12 @@ function Vv() {
           g.includes(s)
         ? "oggi"
         : s,
-    v = m ? Uv : x ? Fv : Lv,
-    h = x
-      ? ["ore", "calendario", "insight", "prenota", "inarchea", "bim", "visual"]
-      : ["calendario", "prenota", "inarchea", "bim", "visual"],
+    v = Reception ? ReceptionMobile : m ? Uv : x ? Fv : Lv,
+    h = Reception
+      ? ["prenota", "fornitori", "materioteca"]
+      : x
+      ? ["ore", "calendario", "insight", "prenota", "inarchea", "bim", "visual", "fornitori", "materioteca", "abacotecnico"]
+      : ["calendario", "prenota", "inarchea", "bim", "visual", "fornitori", "materioteca", "abacotecnico"],
     p = v.some(([E]) => E === b) ? b : h.includes(b) ? "altro" : v[0][0],
     y = Math.max(
       0,
@@ -28150,7 +28377,11 @@ function Vv() {
   const z =
     t &&
     n &&
-    (b === "oggi"
+    (Reception && b === "oggi"
+      ? e.jsx(ReceptionTodayDemo, {}, n.id)
+      : b === "pacchi"
+        ? e.jsx(PackagesDemo, {})
+      : b === "oggi"
       ? e.jsx(pj, {}, n.id)
       : b === "progetti"
         ? e.jsx(jj, {})
@@ -28176,9 +28407,15 @@ function Vv() {
                             ? e.jsx(Wj, {})
                             : b === "bim"
                               ? e.jsx(Kj, {})
-                              : b === "visual"
+                            : b === "visual"
                                 ? e.jsx(Qj, {})
-                                : e.jsx(Rj, {}));
+                                : b === "fornitori"
+                                  ? e.jsx(SuppliersDemo, {})
+                                  : b === "materioteca"
+                                    ? e.jsx(MaterialsDemo, {})
+                                    : b === "abacotecnico"
+                                      ? e.jsx(TechnicalAtlasDemo, {})
+                                      : e.jsx(Rj, {}));
   return e.jsxs("div", {
     className: "app glass-prototype",
     children: [
@@ -28205,7 +28442,7 @@ function Vv() {
                   children: [
                     e.jsx(fp, {}),
                     e.jsx("span", {
-                      children: Ji.filter((E) => E.unread).length,
+                      children: [...parcelNotifications(n), ...Ji].filter((E) => E.unread).length,
                     }),
                   ],
                 }),
