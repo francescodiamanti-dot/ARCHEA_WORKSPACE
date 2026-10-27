@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'archea-planning-suite-v2';
-const VERSION = '0.12.3';
+const STORAGE_KEY = 'archea-planning-suite-v3';
+const VERSION = '0.12.4';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 
@@ -123,6 +123,29 @@ demoData.tasks.push(
   { id:'t204', project:'P44', wbs:'1.4', parent:'t200', title:'Acconto contrattuale DD', type:'Payment', phase:'Design Development (DD)', discipline:'Others', milestone:'Paid', assignee:'r1', start:'2026-10-15', finishTime:'18:00', duration:1, calendar:'solar', progress:100, actualHours:1, plannedHours:1, predecessor:'t201', relation:'FF', lag:0, contractualFee:380000 },
   { id:'t303', project:'P38', wbs:'1.3', parent:'t300', title:'Acconto alla firma', type:'Payment', phase:'Pre-Contract Phase', discipline:'Others', milestone:'Invoicing', assignee:'r1', start:'2026-11-04', finishTime:'18:00', duration:1, calendar:'solar', progress:45, actualHours:1, plannedHours:1, predecessor:'t302', relation:'FS', lag:2, contractualFee:196000 }
 );
+demoData.projects.push(
+  { id:'p52', code:'P52', name:'Social Housing Firenze', status:'Active', businessUnit:'Architecture', client:'Firenze Living S.r.l.', clientType:'Private', category:'Residential', typology:'New Construction', executor:'Archea Associati', owner:'Archea Associati', location:'Italy-Florence-Novoli', studio:'Firenze', manager:'Alessandro Botrini', sponsor:'Marco Casamonti', priority:'High', budget:610000, revenue:840000, externalCosts:118000, internalHours:3260, calendar:'ARCHEA ITALIA · 9h', start:'2026-09-14', end:'2027-09-30', onHoldReason:'', plot:24500, building:31800, underground:5100 },
+  { id:'h05', code:'H05', name:'Stadio di Pisa', status:'Planning', businessUnit:'Architecture', client:'Pisa Sporting Club', clientType:'Private', category:'Sport and Recreational', typology:'Renovation', executor:'Archea Associati', owner:'Archea Associati', location:'Italy-Pisa-Porta a Lucca', studio:'Firenze', manager:'Alessandro Botrini', sponsor:'Laura Andreini', priority:'Medium', budget:480000, revenue:690000, externalCosts:94000, internalHours:2540, calendar:'ARCHEA ITALIA · 9h', start:'2026-11-02', end:'2027-11-26', onHoldReason:'', plot:37500, building:19400, underground:2200 },
+  { id:'i04', code:'I04', name:'Capannoncino', status:'Active', businessUnit:'Industrial Design', client:'Manifattura Toscana', clientType:'Private', category:'Industrial', typology:'Renovation', executor:'Archea Associati', owner:'Archea Associati', location:'Italy-Prato-Macrolotto', studio:'Firenze', manager:'Alessandro Botrini', sponsor:'Silvia Fabi', priority:'Medium', budget:295000, revenue:410000, externalCosts:52000, internalHours:1780, calendar:'ARCHEA ITALIA · 9h', start:'2026-08-24', end:'2027-04-30', onHoldReason:'', plot:13800, building:9200, underground:0 },
+  { id:'d18', code:'D18', name:'Dubai Waterfront Hotel', status:'Active', businessUnit:'Architecture', client:'Gulf Hospitality', clientType:'Private', category:'Hospitality', typology:'New Construction', executor:'Archea Dubai', owner:'Archea Associati', location:'UAE-Dubai-Waterfront', studio:'Dubai', manager:'Francesco Diamanti', sponsor:'Marco Casamonti', priority:'High', budget:1880000, revenue:2650000, externalCosts:460000, internalHours:9240, calendar:'ARCHEA ITALIA · 9h', start:'2026-06-15', end:'2028-02-28', onHoldReason:'', plot:46000, building:78000, underground:17000 },
+  { id:'s21', code:'S21', name:'Shanghai Cultural Center', status:'Planning', businessUnit:'Architecture', client:'Shanghai Culture Group', clientType:'Public', category:'Cultural', typology:'New Construction', executor:'Archea Shanghai', owner:'Archea Shanghai', location:'China-Shanghai-Pudong', studio:'Shanghai', manager:'Francesco Diamanti', sponsor:'Laura Andreini', priority:'High', budget:1320000, revenue:1840000, externalCosts:305000, internalHours:6880, calendar:'CALENDARIO SOLARE', start:'2026-10-05', end:'2028-06-30', onHoldReason:'', plot:55000, building:64000, underground:14800 },
+  { id:'r27', code:'R27', name:'Roma Arena', status:'Completed', businessUnit:'Architecture', client:'Roma Eventi', clientType:'Private', category:'Sport and Recreational', typology:'Renovation', executor:'Archea Associati', owner:'Archea Associati', location:'Italy-Rome-EUR', studio:'Roma', manager:'Francesco Diamanti', sponsor:'Marco Casamonti', priority:'Low', budget:720000, revenue:1040000, externalCosts:180000, internalHours:5120, calendar:'ARCHEA ITALIA · 9h', start:'2025-02-03', end:'2026-07-31', onHoldReason:'', plot:62000, building:32400, underground:4300 },
+  { id:'g12', code:'G12', name:'Genova Waterfront Offices', status:'On Hold', businessUnit:'Architecture', client:'Liguria Development', clientType:'Private', category:'Office', typology:'New Construction', executor:'Archea Associati', owner:'Archea Associati', location:'Italy-Genoa-Waterfront', studio:'Genova', manager:'Alessandro Botrini', sponsor:'Silvia Fabi', priority:'Low', budget:395000, revenue:560000, externalCosts:76000, internalHours:2180, calendar:'ARCHEA ITALIA · 9h', start:'2026-05-18', end:'2027-10-29', onHoldReason:'Attesa variante urbanistica', plot:18400, building:22600, underground:6100 }
+);
+[
+  ['P52','t400','CONCEPT E FATTIBILITÀ','Concept Design (PD)','2026-09-14',38,'r2',54],
+  ['P52','t401','Sviluppo tipologico residenze','Concept Design (PD)','2026-10-05',18,'r3',42],
+  ['H05','t500','RILIEVO E PRE-FATTIBILITÀ','Pre-Contract Phase','2026-11-02',28,'r2',18],
+  ['H05','t501','Restituzione prospetti','Pre-Contract Phase','2026-11-02',12,'r3',35],
+  ['I04','t600','DESIGN DEVELOPMENT','Design Development (DD)','2026-09-07',34,'r2',61],
+  ['I04','t601','Coordinamento involucro','Design Development (DD)','2026-10-12',15,'r4',48],
+  ['D18','t700','SCHEMATIC DESIGN','Schematic Design (SD)','2026-10-01',42,'r1',37],
+  ['D18','t701','Mock-up camere tipo','Schematic Design (SD)','2026-10-19',20,'r5',28],
+  ['S21','t800','MASTERPLAN','Masterplan (MP)','2026-10-05',36,'r1',22],
+  ['S21','t801','Studio flussi pubblici','Masterplan (MP)','2026-10-26',14,'r4',12],
+  ['R27','t900','CONSTRUCTION ADMINISTRATION','Construction Administration (CA)','2026-05-04',30,'r1',100],
+  ['G12','t1000','CONCEPT DESIGN','Concept Design (PD)','2026-05-18',25,'r2',30]
+].forEach(([project,id,title,phase,start,duration,assignee,progress],index)=>demoData.tasks.push({ id, project, wbs:index%2?'1.1':'1', parent:index%2?`t${Number(id.slice(1))-1}`:null, title, type:index%2?'Work':'Summary', phase, discipline:'Architecture', milestone:'', assignee, start, duration, calendar:'working', progress, actualHours:index%2?Math.round(duration*5*progress/100):0, plannedHours:index%2?duration*9:0, predecessor:'', relation:'FS', lag:0 }));
 demoData.projects.forEach((project,index) => Object.assign(project, {
   promoter:project.sponsor,
   contractSigned:index !== 2,
@@ -347,7 +370,12 @@ function renderNav() {
   nav.innerHTML = tabs.map(([id,icon,label]) => `<button data-tab="${id}" class="${currentTab === id ? 'on' : ''}">${navIcon(icon)}<span>${label}</span></button>`).join('');
   nav.querySelectorAll('button').forEach(button => button.addEventListener('click', () => { currentTab = button.dataset.tab; render(); }));
   renderDesktopPlanningSubnav(tabs);
-  document.querySelector('.aps-role').textContent = `${sessionStorage.getItem(PROFILE_NAME_KEY)||profileInfo().professional} · ${profileInfo().label}`;
+  const fullName=sessionStorage.getItem(PROFILE_NAME_KEY)||profileInfo().professional;
+  const firstName=fullName.split(/\s+/)[0];
+  const todayText=new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
+  const header=document.querySelector('.aps-top>div:first-child');
+  if(header) header.innerHTML=`<b>Ciao ${escapeHtml(firstName)}</b><span>${escapeHtml(todayText.charAt(0).toUpperCase()+todayText.slice(1))}</span>`;
+  document.querySelector('.aps-role').textContent = `${fullName} · ${profileInfo().label}`;
   document.querySelector('.aps-close').hidden = ['resource_manager','pmo_admin','client'].includes(profile());
 }
 
@@ -422,7 +450,7 @@ function ganttView() {
   const min = tasks.map(task => task.start).sort()[0];
   const max = tasks.map(taskEnd).sort().at(-1);
   const total = Math.max(45, diffDays(min,max) + 10);
-  const scale = 22;
+  const scale = 30;
   const weeks = Array.from({ length:Math.ceil(total / 7) }, (_, index) => addDays(min,index * 7));
   return `<div class="aps-gantt"><div class="aps-gantt-labels"><header>ATTIVITÀ</header>${tasks.map(task => `<button data-task="${task.id}" class="${task.type === 'Summary' ? 'summary' : ''}"><small>${task.wbs}</small><span>${escapeHtml(task.title)}</span></button>`).join('')}</div><div class="aps-gantt-scroll"><div class="aps-gantt-canvas" style="width:${total * scale}px"><header>${weeks.map(value => `<span style="width:${7 * scale}px">${dateLabel(value).replace(/\s\d{4}$/,'')}</span>`).join('')}</header>${tasks.map(task => { const left = diffDays(min,task.start) * scale; const width = Math.max(scale, (diffDays(task.start,taskEnd(task)) + 1) * scale); const remaining=100-task.progress; return `<div class="aps-gantt-row"><button data-task="${task.id}" class="aps-gantt-bar ${task.type.toLowerCase()}" style="left:${left}px;width:${width}px"><i style="width:${task.progress}%"></i>${task.progress?`<span class="aps-gantt-value done" style="left:0;width:${task.progress}%">${task.progress}%</span>`:''}${remaining?`<span class="aps-gantt-value remaining" style="left:${task.progress}%;width:${remaining}%">${remaining}%</span>`:''}</button></div>`; }).join('')}</div></div></div>`;
 }
@@ -621,7 +649,15 @@ function openSelectPicker(select) {
   root.querySelector('.aps-select-layer')?.remove();
   const layer=document.createElement('div');
   layer.className='aps-modal aps-select-layer';
-  layer.innerHTML = `<div class="aps-dialog aps-select-dialog"><header><div><small>ARCHEA WORKSPACE</small><h2>${escapeHtml(title)}</h2><p>Cerca e seleziona una voce</p></div><button type="button" class="aps-dialog-close"><span>×</span></button></header><div class="aps-select-body"><input class="aps-select-search" type="search" placeholder="Cerca…" autofocus><div class="aps-select-options">${options.map(option=>`<button type="button" data-select-value="${escapeHtml(option.value)}" class="${option.selected?'on':''}"><span><b>${escapeHtml(option.label)}</b></span><i>${option.selected?'✓':''}</i></button>`).join('')}</div></div></div>`;
+  const optionMeta=option=>{
+    const project=state.projects.find(item=>item.code===option.value);
+    if(project) return `${project.status} · ${project.studio}`;
+    const resource=state.resources.find(item=>item.id===option.value||item.name===option.value);
+    if(resource) return `${resource.role} · ${resource.location}`;
+    if(option.value==='all'||option.value==='none') return 'Vista completa';
+    return '';
+  };
+  layer.innerHTML = `<div class="aps-dialog aps-select-dialog"><header><div><small>ARCHEA WORKSPACE</small><h2>${escapeHtml(title)}</h2><p>Cerca e seleziona una voce</p></div><button type="button" class="aps-dialog-close"><span>×</span></button></header><div class="aps-select-body"><input class="aps-select-search" type="search" placeholder="Cerca…" autofocus><div class="aps-select-options">${options.map(option=>{const meta=optionMeta(option);return `<button type="button" data-select-value="${escapeHtml(option.value)}" class="${option.selected?'on':''}"><span><b>${escapeHtml(option.label)}</b>${meta?`<small>${escapeHtml(meta)}</small>`:''}</span><i>${option.selected?'✓':''}</i></button>`}).join('')}</div></div></div>`;
   root.append(layer);
   const close = () => layer.remove();
   layer.querySelector('.aps-dialog-close').addEventListener('click',close);
@@ -712,8 +748,8 @@ function selectDemoProfile(id) {
   sessionStorage.setItem(PROFILE_KEY,id);
   sessionStorage.setItem(PROFILE_NAME_KEY,account.name);
   sessionStorage.setItem('archea-demo-user',info.base);
-  if(id==='resource') sessionStorage.removeItem('archea-planning-autopen');
-  else sessionStorage.setItem('archea-planning-autopen','1');
+  sessionStorage.removeItem('archea-planning-autopen');
+  history.replaceState(null,'','#/oggi');
   location.reload();
 }
 function profileSwitcher(){
@@ -756,9 +792,25 @@ function applyRuntimePolish(){
     let node;
     while((node=walker.nextNode())) if(node.nodeValue.includes('0.12.1')) node.nodeValue=node.nodeValue.replaceAll('0.12.1',VERSION);
   });
+  const icons={
+    validata:'<path d="m4 12 4 4L20 6"/>',
+    in_verifica:'<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
+    da_rivedere:'<path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 0-2 5"/>',
+    scaduta:'<path d="M12 4 21 20H3Z"/><path d="M12 9v5M12 17h.01"/>',
+    in_scadenza:'<circle cx="12" cy="12" r="8"/><path d="M12 8v5h4"/>',
+    in_lavorazione:'<circle cx="12" cy="12" r="8"/><path d="m10 8 6 4-6 4Z"/>',
+    aperta:'<circle cx="12" cy="12" r="8"/><path d="M8 12h8"/>'
+  };
+  document.querySelectorAll('.desk-flow-dot').forEach(dot=>{
+    const key=Object.keys(icons).find(name=>dot.classList.contains(name))||'aperta';
+    if(dot.dataset.apsIcon===key)return;
+    dot.dataset.apsIcon=key;
+    dot.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${icons[key]}</svg>`;
+  });
 }
 
 function injectLaunchers() {
+  if(document.querySelector('.login-screen')) closeSuite(false);
   if(profile()==='resource'){
     document.querySelector('.aps-desktop-launcher')?.remove();
     document.querySelector('.aps-desktop-subnav')?.remove();
@@ -783,7 +835,6 @@ function injectLaunchers() {
   applyShellPermissions();
   applyRuntimePolish();
   if(!document.querySelector('#archea-planning-suite')?.hidden) syncBaseNavigation(true);
-  if((sessionStorage.getItem('archea-planning-autopen')==='1'||['resource_manager','pmo_admin','client'].includes(profile()))&&document.querySelector('.aps-desktop-launcher,.aps-mobile-launcher')&&document.querySelector('#archea-planning-suite')?.hidden){sessionStorage.removeItem('archea-planning-autopen');openSuite('dashboard');}
 }
 
 ensureShell();
@@ -792,15 +843,17 @@ observer.observe(document.documentElement,{childList:true,subtree:true});
 injectLaunchers();
 document.addEventListener('click', event => {
   const clicked=event.target.closest?.('button');
-  if(clicked?.textContent.includes('Esci dalla demo')){sessionStorage.removeItem(PROFILE_KEY);sessionStorage.removeItem(PROFILE_NAME_KEY);sessionStorage.removeItem('archea-planning-autopen');}
+  if(clicked?.textContent.includes('Esci dalla demo')){closeSuite(false);history.replaceState(null,'','#/oggi');sessionStorage.removeItem(PROFILE_KEY);sessionStorage.removeItem(PROFILE_NAME_KEY);sessionStorage.removeItem('archea-planning-autopen');}
   if(clicked&&!clicked.closest('.aps-login-accounts')&&document.querySelector('.aps-login-accounts')&&['Francesco Diamanti','Alessandro Botrini','Lisandro Leyra','ARCHEA Property'].some(name=>clicked.textContent.includes(name))){sessionStorage.removeItem(PROFILE_KEY);sessionStorage.removeItem(PROFILE_NAME_KEY);}
   if (event.target.closest?.('.aps-desktop-launcher,.aps-mobile-launcher')) {
     event.preventDefault();
     event.stopPropagation();
-    openSuite('dashboard');
+    const root=document.querySelector('#archea-planning-suite');
+    if(root&&!root.hidden) closeSuite(); else openSuite('dashboard');
   }
   const baseNavButton=event.target.closest?.('.desk-sidebar nav > button:not(.aps-desktop-launcher),.desk-developer-button,.desk-settings-button');
   if(baseNavButton&&!event.target.closest?.('.aps-desktop-subnav')) closeSuite(false);
 }, true);
+document.addEventListener('submit',event=>{if(event.target.closest?.('.login-screen')){history.replaceState(null,'','#/oggi');sessionStorage.removeItem('archea-planning-autopen');}},true);
 window.addEventListener('keydown',event => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !document.querySelector('#archea-planning-suite')?.hidden) { event.preventDefault(); undo(); } if (event.key === 'Escape' && !document.querySelector('#archea-planning-suite')?.hidden) closeSuite(); });
 

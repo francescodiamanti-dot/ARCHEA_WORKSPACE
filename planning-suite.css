@@ -76,3 +76,18 @@ html[data-aps-profile="resource"] .desk-project-grid>button>div>span:nth-child(2
 html[data-aps-profile="resource"] .desk-project-grid>button>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 
 @media(max-width:900px){.aps-login-accounts button{grid-template-columns:9px minmax(0,1fr) auto}.aps-login-accounts button>small{font-size:6px}.aps-section-controls{margin-top:0}.aps-spaced-grid{margin-top:14px}}
+
+/* v0.12.4 · selettori, Gantt e shell desktop */
+.aps-select-options{gap:7px;padding:2px 2px 5px;background:transparent}
+.aps-select-options button{min-height:60px;padding:10px 13px;border:1px solid #dfe2de!important;border-radius:13px;background:#fff;box-shadow:0 3px 10px #27312b05}
+.aps-select-options button:last-child{border-bottom:1px solid #dfe2de!important}
+.aps-select-options button:hover,.aps-select-options button.on{border-color:#c5cbc6!important;background:#e9ece8}
+.aps-select-options button span{display:grid;gap:3px}.aps-select-options button b{font-size:10px}.aps-select-options button small{color:#7a827c;font-size:8px;font-weight:600}
+.aps-filterbar label:has(select){min-height:50px;padding:7px 40px 6px 12px;border-radius:12px}.aps-filterbar label{flex-basis:225px;min-width:190px}.aps-filterbar select{height:20px;font-size:10px}
+.aps-gantt-labels button.summary{background:#fff}.aps-gantt-bar,.aps-gantt-bar.summary{top:7px;height:28px;border-radius:7px}.aps-gantt-bar>span.aps-gantt-value{font-size:9px}.aps-gantt-canvas{background-size:210px 100%}
+.aps-top>div:first-child span{color:#747b76;font-size:9px}.aps-top>div:first-child b{font-size:15px}
+@media(min-width:901px){.aps.aps-integrated .aps-workspace{grid-template-rows:68px minmax(0,1fr)}.aps.aps-integrated .aps-top>div:last-child{display:none}}
+.desk-flow-dot{display:grid!important;place-items:center!important;width:22px!important;height:22px!important;margin:auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}
+.desk-flow-dot svg{width:18px!important;height:18px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.task-table .desk-done-col{width:44px!important;min-width:44px!important;padding-right:6px!important;padding-left:6px!important}
+.desk-excel-setting .desk-primary{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border:0;border-radius:10px;background:#252a27;color:#fff;font-size:10px;font-weight:800;cursor:pointer}
