@@ -113,6 +113,8 @@ html[data-aps-profile="resource"] .desk-project-grid>button>div{grid-template-co
   .desk-user>i{margin:0!important}
   body:has(.desktop-app) .aps.aps-integrated{left:78px!important}
 }
+
+.aps-status.archived{background:#f0f1ef;color:#7b817d}
 @media(max-width:979px){
   .aps:not(.aps-integrated){background:#fff}.aps:not(.aps-integrated) .aps-shell{display:block;height:100dvh}.aps:not(.aps-integrated) .aps-workspace{height:100dvh;padding-bottom:86px;grid-template-rows:64px minmax(0,1fr)}
   .aps:not(.aps-integrated) .aps-top{padding:0 18px}.aps:not(.aps-integrated) .aps-top>div:last-child{display:flex}.aps:not(.aps-integrated) .aps-close{display:grid!important}.aps:not(.aps-integrated) .aps-role{display:none}

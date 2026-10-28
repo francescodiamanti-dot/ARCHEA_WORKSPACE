@@ -8999,7 +8999,7 @@ var lc = cu.exports,
   dp,
   wd = lc;
 (dp = wd.createRoot), wd.hydrateRoot;
-const xa = "0.14.1",
+const xa = "0.14.2",
   te = ({ children: t, size: n = 22 }) =>
     e.jsx("svg", {
       width: n,
@@ -9337,7 +9337,36 @@ const Zs = {
   },
   Px = "OFF",
   Ix = { P16: "P13" },
-  zx = ["Attivo", "Standby", "Freeze", "Fermo"],
+  PROJECT_STATUS_OPTIONS = [
+    {
+      value: "Planning",
+      description: "Commessa pianificata o in fase pre-contrattuale",
+    },
+    { value: "Active", description: "Commessa in lavorazione" },
+    {
+      value: "On Hold",
+      description: "Commessa temporaneamente sospesa o bloccata",
+    },
+    { value: "Completed", description: "Attività concluse" },
+    { value: "Archived", description: "Commessa chiusa e archiviata" },
+  ],
+  normalizeProjectStatus = (t) => {
+    const n = se(t);
+    return ["planning", "pianificazione", "standby", "standbyproject"].includes(n)
+      ? "Planning"
+      : ["active", "attivo", "attiva", "attivi"].includes(n)
+        ? "Active"
+        : ["onhold", "sospeso", "sospesa", "fermo", "fermi", "freeze"].includes(n)
+          ? "On Hold"
+          : ["completed", "concluso", "conclusa", "conclusi"].includes(n)
+            ? "Completed"
+            : ["archived", "archiviato", "archiviata", "storico", "storici"].includes(n)
+              ? "Archived"
+              : String(t || "Archived");
+  },
+  projectStatusSlug = (t) =>
+    normalizeProjectStatus(t).toLowerCase().replace(/\s+/g, "-"),
+  zx = PROJECT_STATUS_OPTIONS.map((t) => t.value),
   Ox = [
     {
       id: "fdallo",
@@ -9448,14 +9477,8 @@ function Xs(t, n) {
   return s ? t[s] : void 0;
 }
 function Lx(t) {
-  return {
-    attivo: "Attivo",
-    attiva: "Attivo",
-    active: "Attivo",
-    standby: "Standby",
-    freeze: "Freeze",
-    fermo: "Fermo",
-  }[se(t)];
+  const n = normalizeProjectStatus(t);
+  return PROJECT_STATUS_OPTIONS.some((s) => s.value === n) ? n : void 0;
 }
 function Fx(t, n, s) {
   var o;
@@ -9822,6 +9845,15 @@ const Xt = {
       appRole: "architect",
     },
     {
+      id: "mmadaghiele",
+      nome: "Mirko Madaghiele",
+      email: "mirko.madaghiele@archea.it",
+      demoPassword: "demo",
+      ruolo: "membro",
+      appRole: "architect",
+      materialLibraryManager: !0,
+    },
+    {
       id: "property",
       nome: "ARCHEA Property",
       email: "property@archea.it",
@@ -9926,7 +9958,7 @@ function Sp(t, n, s) {
         id: h,
         codice: h,
         nome: gp(g(h)) || h,
-        stato: "Storico",
+        stato: "Archived",
         ordine: 1e6 + f.length,
         inElenco: !1,
       });
@@ -9940,8 +9972,8 @@ function Sp(t, n, s) {
     },
     v = [...a, ...f].sort(
       (h, p) =>
-        (h.stato.toLowerCase() === "attivo" ? 0 : 1) -
-          (p.stato.toLowerCase() === "attivo" ? 0 : 1) ||
+        (normalizeProjectStatus(h.stato) === "Active" ? 0 : 1) -
+          (normalizeProjectStatus(p.stato) === "Active" ? 0 : 1) ||
         b(h.stato) - b(p.stato) ||
         h.ordine - p.ordine,
     );
@@ -9972,15 +10004,15 @@ const Dd = (t) =>
       Date.UTC(+t.slice(0, 4), +t.slice(5, 7) - 1, +t.slice(8, 10)) / 864e5,
     ) + 25569,
   sl = [
-    ["P51", "Ampliamento Fiorentina", "Attivo"],
-    ["M86", "Stadio Flaminio", "Attivo"],
-    ["O80", "Milanello Training Center", "Attivo"],
-    ["H05", "Stadio di Pisa", "Attivo"],
-    ["I05", "Fiorentina Training Center / Viola Park", "Standby"],
-    ["I04", "Capannoncino", "Attivo"],
-    ["P13", "Stadio di Napoli", "Freeze"],
-    ["P52", "Social housing Firenze", "Standby"],
-    ["M01", "Livorno Porto a Mare", "Fermo"],
+    ["P51", "Ampliamento Fiorentina", "Active"],
+    ["M86", "Stadio Flaminio", "Active"],
+    ["O80", "Milanello Training Center", "Active"],
+    ["H05", "Stadio di Pisa", "Active"],
+    ["I05", "Fiorentina Training Center / Viola Park", "Planning"],
+    ["I04", "Capannoncino", "Active"],
+    ["P13", "Stadio di Napoli", "On Hold"],
+    ["P52", "Social housing Firenze", "Planning"],
+    ["M01", "Livorno Porto a Mare", "On Hold"],
   ],
   nt = "Francesco Diamanti",
   In = "Alessandro Botrini",
@@ -10873,7 +10905,7 @@ const Sa = ({ value: t, options: n, onChange: s, label: r }) =>
   ij = { aperta: "Aperta", in_corso: "In corso", chiusa: "Chiusa" },
   Ap = ({ s: t }) =>
     e.jsx("span", { className: `pill note-${t}`, children: ij[t] }),
-  Br = (t) => `ps-${t.toLowerCase().replace(/[^a-z]/g, "") || "nd"}`,
+  Br = (t) => `ps-${projectStatusSlug(t).replace(/-/g, "") || "nd"}`,
   Xi = ({ children: t }) => e.jsx("p", { className: "empty", children: t }),
   Ca = {
     membersSeeAllProjects: !0,
@@ -11149,6 +11181,184 @@ function pe({ value: t, duration: n = 1e3, format: s }) {
     s ? s(i) : i
   );
 }
+const TODAY_AGENDA_DEMO = [
+  {
+    id: "agenda-team",
+    ownerIds: ["fdiamanti", "abotrini", "lleyra", "mmadaghiele"],
+    title: "Coordinamento progetto P51",
+    start: "09:00",
+    end: "10:00",
+    location: "Sala Cellini",
+    tone: "teal",
+  },
+  {
+    id: "agenda-review",
+    ownerIds: ["fdiamanti", "abotrini"],
+    title: "Revisione consegne e priorità",
+    start: "11:30",
+    end: "12:30",
+    location: "Sala Lungarno",
+    tone: "clay",
+  },
+  {
+    id: "agenda-materials",
+    ownerIds: ["mmadaghiele"],
+    title: "Aggiornamento campioni Materioteca",
+    start: "14:00",
+    end: "15:30",
+    location: "Materioteca",
+    tone: "sage",
+  },
+  {
+    id: "agenda-property",
+    ownerIds: ["property"],
+    title: "Riepilogo direzione e studi",
+    start: "10:30",
+    end: "12:00",
+    location: "Sala Lungarno",
+    tone: "dark",
+  },
+  {
+    id: "agenda-reception",
+    ownerIds: ["alaurini"],
+    title: "Allestimento riunione clienti",
+    start: "08:30",
+    end: "09:15",
+    location: "Sala Ingresso",
+    tone: "clay",
+  },
+  {
+    id: "agenda-departments",
+    ownerIds: ["scardia", "mgamberi", "afrongia"],
+    title: "Allineamento dipartimenti",
+    start: "15:00",
+    end: "16:00",
+    location: "Sala Cellini",
+    tone: "teal",
+  },
+  {
+    id: "agenda-focus",
+    ownerIds: Vn.map((t) => t.id),
+    title: "Focus personale · nessuna riunione",
+    start: "17:30",
+    end: "18:15",
+    location: "Agenda personale",
+    tone: "slate",
+  },
+];
+const agendaMinutes = (t) => {
+  const [n, s] = String(t || "00:00").split(":").map(Number);
+  return n * 60 + s;
+};
+function TodayAgendaWidget({ viewer: t, events: n = [], compact: s = !1 }) {
+  const { today: agendaToday } = Y(),
+    r = 8 * 60,
+    i = 20 * 60,
+    a = i - r,
+    l = [
+      ...TODAY_AGENDA_DEMO.filter((u) => u.ownerIds.includes(t.id)),
+      ...n
+        .filter(
+          (u) =>
+            (!u.date || u.date === agendaToday) &&
+            (u.ownerId === t.id ||
+              u.assigneeId === t.id ||
+              (u.attendeeIds || []).includes(t.id)),
+        )
+        .map((u) => ({
+          ...u,
+          start: u.start || u.time || "09:00",
+          end: u.end || "10:00",
+          tone: u.tone || "sage",
+        })),
+    ]
+      .filter(
+        (u, m, x) => x.findIndex((j) => j.id === u.id) === m,
+      )
+      .sort((u, m) => agendaMinutes(u.start) - agendaMinutes(m.start)),
+    o = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Rome",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: !1,
+    }).formatToParts(new Date()),
+    c = Number(o.find((u) => u.type === "hour").value) * 60 +
+      Number(o.find((u) => u.type === "minute").value),
+    d = Math.max(0, Math.min(100, ((c - r) / a) * 100));
+  return e.jsxs("div", {
+    className: `today-agenda${s ? " compact" : ""}`,
+    children: [
+      e.jsx("div", {
+        className: "today-agenda-times",
+        children: [8, 10, 12, 14, 16, 18, 20].map((u) =>
+          e.jsx("span", { style: { top: `${((u * 60 - r) / a) * 100}%` }, children: `${String(u).padStart(2, "0")}:00` }, u),
+        ),
+      }),
+      e.jsxs("div", {
+        className: "today-agenda-track",
+        children: [
+          [8, 10, 12, 14, 16, 18, 20].map((u) =>
+            e.jsx("i", { className: "agenda-gridline", style: { top: `${((u * 60 - r) / a) * 100}%` } }, u),
+          ),
+          l.map((u) => {
+            const m = Math.max(r, agendaMinutes(u.start)),
+              x = Math.min(i, agendaMinutes(u.end));
+            return e.jsxs(
+              "article",
+              {
+                className: `agenda-event ${u.tone || "sage"}`,
+                style: {
+                  top: `${((m - r) / a) * 100}%`,
+                  height: `${Math.max(5.5, ((x - m) / a) * 100)}%`,
+                },
+                children: [
+                  e.jsx("b", { children: u.title }),
+                  e.jsxs("span", { children: [u.start, " – ", u.end] }),
+                  !s && u.location && e.jsx("small", { children: u.location }),
+                ],
+              },
+              u.id,
+            );
+          }),
+          c >= r &&
+            c <= i &&
+            e.jsx("span", {
+              className: "agenda-now-line",
+              style: { top: `${d}%` },
+              children: e.jsx("i", {}),
+            }),
+        ],
+      }),
+    ],
+  });
+}
+function PersonalAgendaPanel() {
+  const { viewer: t, language: n } = Y();
+  if (!t) return null;
+  return e.jsxs("section", {
+    className: "desk-panel special-today-agenda",
+    children: [
+      e.jsxs("header", {
+        children: [
+          e.jsxs("div", {
+            children: [
+              e.jsx("small", { children: "AGENDA PERSONALE" }),
+              e.jsx("h2", {
+                children:
+                  n === "en" ? "Today's appointments" : "Appuntamenti di oggi",
+              }),
+            ],
+          }),
+          e.jsx("span", {
+            className: "agenda-personal-label",
+            children: n === "en" ? "Only your events" : "Solo i tuoi eventi",
+          }),
+        ],
+      }),
+      e.jsx(TodayAgendaWidget, { viewer: t }),
+    ],
+  });
+}
 const hj = [
     ["aperte", "Aperte"],
     ["in_scadenza", "In scadenza"],
@@ -11265,6 +11475,24 @@ function pj() {
               e.jsx("span", { children: g ? "To review" : "Da rivedere" }),
             ],
           }),
+        ],
+      }),
+      e.jsxs("section", {
+        className: "mobile-today-agenda",
+        children: [
+          e.jsxs("div", {
+            className: "section-head",
+            children: [
+              e.jsx("h2", {
+                children: g ? "Today's appointments" : "Appuntamenti di oggi",
+              }),
+              e.jsx("span", {
+                className: "agenda-personal-label",
+                children: g ? "Personal calendar" : "Solo la tua agenda",
+              }),
+            ],
+          }),
+          e.jsx(TodayAgendaWidget, { viewer: s, compact: !0 }),
         ],
       }),
       e.jsxs("div", {
@@ -11652,7 +11880,7 @@ function xj() {
 }
 function jj() {
   const { data: t, viewer: n, language: s } = Y(),
-    [r, i] = C.useState("attivi"),
+    [r, i] = C.useState("Active"),
     [a, l] = C.useState(""),
     [o, c] = C.useState(null),
     d = xj();
@@ -11668,7 +11896,7 @@ function jj() {
     m = se(a),
     x = Ep(n, t.progetti).filter(
       (j) =>
-        (r === "tutti" || j.stato.toLowerCase() === "attivo") &&
+        (r === "all" || normalizeProjectStatus(j.stato) === r) &&
         (!m || se(`${j.codice} ${j.nome}`).includes(m)),
     );
   return e.jsxs(e.Fragment, {
@@ -11687,8 +11915,8 @@ function jj() {
         value: r,
         onChange: i,
         options: [
-          ["attivi", u ? "Active" : "Attivi"],
-          ["tutti", u ? "All" : "Tutti"],
+          ["all", u ? "All" : "Tutti"],
+          ...PROJECT_STATUS_OPTIONS.map((j) => [j.value, j.value]),
         ],
       }),
       !Jn(n) &&
@@ -13124,7 +13352,7 @@ const Mp = "archea-demo-site-annotations-v1",
 function Aj() {
   var $;
   const { data: t, viewer: n, language: s } = Y(),
-    r = t.progetti.filter((N) => N.stato.toLowerCase() === "attivo"),
+    r = t.progetti.filter((N) => normalizeProjectStatus(N.stato) === "Active"),
     [i, a] = C.useState((($ = r[0]) == null ? void 0 : $.codice) || ""),
     [l, o] = C.useState(zp),
     [c, d] = C.useState([]),
@@ -14583,14 +14811,16 @@ const Mj = {
     ],
   },
   zt = (t) => {
-    const n = String(t || "").toLowerCase();
-    return n === "attivo"
-      ? "active"
-      : n === "standby" || n === "stand by"
-        ? "standby"
-        : ["fermo", "freeze"].includes(n)
-          ? "stopped"
-          : "completed";
+    const n = normalizeProjectStatus(t);
+    return n === "Planning"
+      ? "planning"
+      : n === "Active"
+        ? "active"
+        : n === "On Hold"
+          ? "on-hold"
+          : n === "Completed"
+            ? "completed"
+            : "archived";
   },
   Jt = (t) => _j[t] ?? "firenze",
   Rr = (t) => $p[t] ?? [],
@@ -15268,7 +15498,7 @@ function Lj() {
   var j;
   const { data: t, viewer: n, language: s } = Y(),
     r = s === "en",
-    i = t.progetti.filter((f) => f.stato.toLowerCase() === "attivo"),
+    i = t.progetti.filter((f) => normalizeProjectStatus(f.stato) === "Active"),
     [a, l] = C.useState(((j = i[0]) == null ? void 0 : j.codice) || ""),
     [o, c] = C.useState(!1),
     [d, u] = C.useState(""),
@@ -15689,10 +15919,11 @@ function Fj() {
   });
 }
 const Wd = [
-    ["active", "Progetti attivi", "Active projects"],
-    ["standby", "Progetti in standby", "Standby projects"],
-    ["stopped", "Progetti fermi", "Stopped projects"],
-    ["completed", "Progetti conclusi", "Completed projects"],
+    ["planning", "Planning", "Planning"],
+    ["active", "Active", "Active"],
+    ["on-hold", "On Hold", "On Hold"],
+    ["completed", "Completed", "Completed"],
+    ["archived", "Archived", "Archived"],
   ],
   ll = (t, n) =>
     t.ore
@@ -16266,9 +16497,12 @@ function Bj() {
                   options: Vn.map((m) => ({
                     value: m.id,
                     label: m.nome,
-                    meta: ao.includes(m.id)
-                      ? `${Xt[m.appRole]} · Platform Owner`
-                      : Xt[m.appRole],
+                    meta:
+                      m.id === "mmadaghiele"
+                        ? "Architect · Gestore Materioteca"
+                        : ao.includes(m.id)
+                          ? `${Xt[m.appRole]} · Platform Owner`
+                          : Xt[m.appRole],
                   })),
                   onChange: (m) => {
                     const x = Vn.find((j) => j.id === m);
@@ -16277,6 +16511,16 @@ function Bj() {
                 }),
               }),
             ],
+          }),
+        ],
+      }),
+      e.jsxs("footer", {
+        className: "login-watermark",
+        children: [
+          e.jsxs("span", { children: ["v", xa, " · DEMO LOCALE"] }),
+          e.jsx("span", {
+            children:
+              "© 2026 · Fatto per Archea Associati da Francesco Diamanti",
           }),
         ],
       }),
@@ -16756,30 +17000,13 @@ function Gj({ data: t, viewer: n, today: s, en: r, setTab: i }) {
       .slice(0, 5),
     U = Math.max(1, ...E.map((A) => A.count)),
     P = [
-      {
-        label: r ? "Active" : "Attivi",
-        className: "active",
-        count: t.progetti.filter((A) => Js(A.stato) === "attivo").length,
-      },
-      {
-        label: "Standby",
-        className: "standby",
-        count: t.progetti.filter((A) => Js(A.stato).includes("stand")).length,
-      },
-      {
-        label: r ? "Stopped" : "Fermi",
-        className: "stopped",
-        count: t.progetti.filter((A) =>
-          ["fermo", "freeze"].some((w) => Js(A.stato).includes(w)),
+      ...PROJECT_STATUS_OPTIONS.map((A) => ({
+        label: A.value,
+        className: projectStatusSlug(A.value),
+        count: t.progetti.filter(
+          (w) => normalizeProjectStatus(w.stato) === A.value,
         ).length,
-      },
-      {
-        label: r ? "Completed" : "Conclusi",
-        className: "closed",
-        count: t.progetti.filter((A) =>
-          ["concluso", "storico"].some((w) => Js(A.stato).includes(w)),
-        ).length,
-      },
+      })),
     ],
     $ = Math.max(
       1,
@@ -16788,7 +17015,8 @@ function Gj({ data: t, viewer: n, today: s, en: r, setTab: i }) {
     N = (P[0].count / $) * 100,
     I = N + (P[1].count / $) * 100,
     S = I + (P[2].count / $) * 100,
-    L = `conic-gradient(var(--active-border) 0 ${N}%,var(--orange) ${N}% ${I}%,#984b4b ${I}% ${S}%,var(--ink) ${S}% 100%)`,
+    R = S + (P[3].count / $) * 100,
+    L = `conic-gradient(#a9afb2 0 ${N}%,#718779 ${N}% ${I}%,#c57f66 ${I}% ${S}%,#5e6661 ${S}% ${R}%,#d7dad7 ${R}% 100%)`,
     H = t.persone
       .filter((A) => A.inRiepiloghiOre)
       .map((A) => ({
@@ -18188,6 +18416,16 @@ const Bp = [
       status: "active",
       lastAccess: "Oggi · 12:44",
       mfa: !1,
+    },
+    {
+      id: "mmadaghiele",
+      name: "Mirko Madaghiele",
+      email: "mirko.madaghiele@archea.it",
+      role: "architect",
+      studio: "Firenze · Materioteca",
+      status: "active",
+      lastAccess: "Oggi · 13:26",
+      mfa: !0,
     },
     {
       id: "property",
@@ -20238,7 +20476,7 @@ function qd({
     ],
   });
 }
-function hv({ tasks: t, hours: n, projects: s }) {
+function hv({ tasks: t, hours: n, projects: s, events: todayEvents = [] }) {
   const { viewer: r, today: i, data: a, setTab: l } = Y(),
     o = s || a.progetti,
     c = Yn(r, t, Mt).filter((M) => Mt(M, r)),
@@ -20262,7 +20500,7 @@ function hv({ tasks: t, hours: n, projects: s }) {
       .reduce((M, q) => M + Number(q.ore || 0), 0),
     p = c.filter((M) => qe(M, i)).slice(0, 6),
     y = n.filter((M) => M.persona === r.nome),
-    O = o.filter((M) => M.stato.toLowerCase() === "attivo"),
+    O = o.filter((M) => normalizeProjectStatus(M.stato) === "Active"),
     k = Array.from({ length: 7 }, (M, q) => {
       const Z = new Date(`${i}T12:00:00Z`);
       return Z.setUTCDate(Z.getUTCDate() - 6 + q), Z.toISOString().slice(0, 10);
@@ -20274,6 +20512,7 @@ function hv({ tasks: t, hours: n, projects: s }) {
     U = [
       "workstatus",
       "priority",
+      "agenda",
       "projects",
       "hours",
       "status",
@@ -20291,6 +20530,11 @@ function hv({ tasks: t, hours: n, projects: s }) {
         id: "priority",
         label: "Priorità",
         description: "Task da tenere sotto controllo",
+      },
+      {
+        id: "agenda",
+        label: "Agenda di oggi",
+        description: "Appuntamenti personali e linea dell'ora corrente",
       },
       {
         id: "projects",
@@ -20324,6 +20568,7 @@ function hv({ tasks: t, hours: n, projects: s }) {
     A = {
       workstatus: "medium",
       priority: "medium",
+      agenda: "medium",
       projects: "medium",
       hours: "small",
       status: "medium",
@@ -20343,6 +20588,14 @@ function hv({ tasks: t, hours: n, projects: s }) {
       label: M,
       value: b.filter((Z) => new RegExp(q, "i").test(Z.priorita || "")).length,
     }));
+  C.useEffect(() => {
+    const M = `archea-home-agenda-added-${r.id}`;
+    try {
+      if (localStorage.getItem(M)) return;
+      S((q) => (q.includes("agenda") ? q : [...q, "agenda"]));
+      localStorage.setItem(M, "1");
+    } catch {}
+  }, [r.id]);
   return e.jsxs(e.Fragment, {
     children: [
       e.jsx(ae, {
@@ -20580,6 +20833,53 @@ function hv({ tasks: t, hours: n, projects: s }) {
             ],
           }),
           e.jsxs("section", {
+            className: `desk-panel desk-today-agenda movable ${D("agenda")}`,
+            ...P("agenda"),
+            children: [
+              e.jsxs("header", {
+                children: [
+                  e.jsxs("div", {
+                    children: [
+                      e.jsx("small", { children: "AGENDA PERSONALE" }),
+                      e.jsx("h2", { children: "Appuntamenti di oggi" }),
+                    ],
+                  }),
+                  e.jsxs("div", {
+                    className: "desk-widget-head-actions",
+                    children: [
+                      e.jsxs("strong", {
+                        children: [
+                          TODAY_AGENDA_DEMO.filter((M) =>
+                            M.ownerIds.includes(r.id),
+                          ).length +
+                            todayEvents.filter(
+                              (M) =>
+                                (!M.date || M.date === i) &&
+                                (M.ownerId === r.id ||
+                                  M.assigneeId === r.id ||
+                                  (M.attendeeIds || []).includes(r.id)),
+                            ).length,
+                          " eventi",
+                        ],
+                      }),
+                      e.jsx(zn, {
+                        id: "agenda",
+                        value: w.agenda || "medium",
+                        onChange: T,
+                        allowed: ["small", "medium", "large"],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+              e.jsx(TodayAgendaWidget, {
+                viewer: r,
+                events: todayEvents,
+                compact: w.agenda === "small",
+              }),
+            ],
+          }),
+          e.jsxs("section", {
             className: `desk-panel movable ${D("projects")}`,
             ...P("projects"),
             children: [
@@ -20611,7 +20911,7 @@ function hv({ tasks: t, hours: n, projects: s }) {
               e.jsx("div", {
                 className: "desk-project-summary",
                 children: o
-                  .filter((M) => M.stato.toLowerCase() === "attivo")
+                  .filter((M) => normalizeProjectStatus(M.stato) === "Active")
                   .slice(0, 5)
                   .map((M) => {
                     const q = t.filter(
@@ -20932,7 +21232,7 @@ function pv({ tasks: t, setTasks: n, projects: s }) {
     ),
     [y, O] = C.useState(!1),
     [k, z] = C.useState(!1),
-    E = l.find((R) => R.stato.toLowerCase() === "attivo") || l[0],
+    E = l.find((R) => normalizeProjectStatus(R.stato) === "Active") || l[0],
     U = C.useMemo(
       () => ({
         progettoCodice: (E == null ? void 0 : E.codice) || "",
@@ -22395,10 +22695,7 @@ function jv({ tasks: t, hours: n, notes: s, projects: r }) {
     [f, g] = C.useState("all"),
     [b, v] = C.useState(null),
     [h, p] = C.useState(null),
-    y = (z) =>
-      String(z || "")
-        .toLowerCase()
-        .replace(/\s+/g, ""),
+    y = (z) => projectStatusSlug(z),
     O = o
       .filter((z) => c === "all" || y(z.stato) === c)
       .filter((z) =>
@@ -22727,10 +23024,11 @@ function jv({ tasks: t, hours: n, notes: s, projects: r }) {
             value: c,
             options: [
               { value: "all", label: "Tutti gli stati" },
-              { value: "attivo", label: "Attivi" },
-              { value: "standby", label: "Stand by" },
-              { value: "fermo", label: "Fermi" },
-              { value: "concluso", label: "Conclusi" },
+              ...PROJECT_STATUS_OPTIONS.map((z) => ({
+                value: projectStatusSlug(z.value),
+                label: z.value,
+                meta: z.description,
+              })),
             ],
             onChange: d,
           }),
@@ -22765,8 +23063,8 @@ function jv({ tasks: t, hours: n, notes: s, projects: r }) {
                       ],
                     }),
                     e.jsx("i", {
-                      className: `project-state ${z.stato.toLowerCase().replace(/\s/g, "-")}`,
-                      children: z.stato,
+                      className: `project-state ${projectStatusSlug(z.stato)}`,
+                      children: normalizeProjectStatus(z.stato),
                     }),
                   ],
                 }),
@@ -22815,7 +23113,7 @@ function vv({ notes: t, setNotes: n, projects: s }) {
   const { data: r, viewer: i, today: a } = Y(),
     l = s || r.progetti,
     [o, c] = C.useState(
-      ((y = l.find((k) => k.stato.toLowerCase() === "attivo")) == null
+      ((y = l.find((k) => normalizeProjectStatus(k.stato) === "Active")) == null
         ? void 0
         : y.codice) ||
         ((O = l[0]) == null ? void 0 : O.codice) ||
@@ -23165,7 +23463,7 @@ function yv({
     [y, O] = C.useState({
       codice: "",
       nome: "",
-      stato: "Attivo",
+      stato: "Planning",
       studio: "firenze",
     }),
     [k, z] = C.useState({
@@ -23227,7 +23525,7 @@ function yv({
           },
         ]),
         o(B),
-        O({ codice: "", nome: "", stato: "Attivo", studio: "firenze" }),
+        O({ codice: "", nome: "", stato: "Planning", studio: "firenze" }),
         d(!1));
     },
     L = (w) => {
@@ -23316,9 +23614,9 @@ function yv({
                     }),
                     e.jsxs("button", {
                       type: "button",
-                      className: `project-state ${w.stato.toLowerCase().replace(/\s/g, "-")}`,
+                      className: `project-state ${projectStatusSlug(w.stato)}`,
                       onClick: () => m(w.codice),
-                      children: [w.stato, e.jsx(_t, {})],
+                      children: [normalizeProjectStatus(w.stato), e.jsx(_t, {})],
                     }),
                   ],
                 },
@@ -23417,37 +23715,27 @@ function yv({
           children: [
             e.jsx("div", {
               className: "desk-select-options",
-              children: ["Attivo", "Standby", "Fermo", "Concluso"].map((w) =>
+              children: PROJECT_STATUS_OPTIONS.map((w) =>
                 e.jsxs(
                   "button",
                   {
                     type: "button",
-                    className:
-                      $.stato.toLowerCase() === w.toLowerCase() ? "on" : "",
-                    onClick: () => N($.codice, w),
+                    className: `status-option ${projectStatusSlug(w.value)}${normalizeProjectStatus($.stato) === w.value ? " on" : ""}`,
+                    onClick: () => N($.codice, w.value),
                     children: [
                       e.jsxs("span", {
                         children: [
-                          e.jsx("b", { children: w }),
-                          e.jsx("small", {
-                            children:
-                              w === "Attivo"
-                                ? "Commessa in lavorazione"
-                                : w === "Standby"
-                                  ? "Temporaneamente sospesa"
-                                  : w === "Fermo"
-                                    ? "Attività bloccate"
-                                    : "Commessa archiviata",
-                          }),
+                          e.jsx("b", { children: w.value }),
+                          e.jsx("small", { children: w.description }),
                         ],
                       }),
                       e.jsx("i", {
                         children:
-                          $.stato.toLowerCase() === w.toLowerCase() ? "✓" : "",
+                          normalizeProjectStatus($.stato) === w.value ? "✓" : "",
                       }),
                     ],
                   },
-                  w,
+                  w.value,
                 ),
               ),
             }),
@@ -23553,9 +23841,11 @@ function yv({
                   e.jsx(fe, {
                     label: "Stato",
                     value: y.stato,
-                    options: ["Attivo", "Standby", "Fermo", "Concluso"].map(
-                      (w) => ({ value: w, label: w }),
-                    ),
+                    options: PROJECT_STATUS_OPTIONS.map((w) => ({
+                      value: w.value,
+                      label: w.value,
+                      meta: w.description,
+                    })),
                     onChange: (w) => O({ ...y, stato: w }),
                   }),
                 ],
@@ -24713,6 +25003,7 @@ function Ev({ events: t, setEvents: n, tasks: s }) {
               id: en("calendar"),
               title: m.title.trim(),
               createdBy: i.nome,
+              ownerId: i.id,
             },
           ]),
           c(!1),
@@ -25120,7 +25411,7 @@ function Tv({ messages: t, setMessages: n }) {
 function Pv({ setTasks: onSetTasks = null }) {
   var m, x, j;
   const { data: t, viewer: n } = Y(),
-    s = t.progetti.filter((f) => f.stato.toLowerCase() === "attivo"),
+    s = t.progetti.filter((f) => normalizeProjectStatus(f.stato) === "Active"),
     [r, i] = C.useState(((m = s[0]) == null ? void 0 : m.codice) || ""),
     [a, l] = ke("archea-desktop-demo-site-tasks", zp),
     [o, c] = ke("archea-desktop-demo-plans", [
@@ -25800,12 +26091,12 @@ function Iv({ staffProfiles: t = {}, projects: n }) {
                   children: [
                     e.jsx(Q, { label: "Progetti", value: b.length }),
                     e.jsx(Q, {
-                      label: "Attivi",
+                      label: "Active",
                       value: b.filter((I) => zt(I.stato) === "active").length,
                     }),
                     e.jsx(Q, {
-                      label: "In standby",
-                      value: b.filter((I) => zt(I.stato) === "standby").length,
+                      label: "On Hold",
+                      value: b.filter((I) => zt(I.stato) === "on-hold").length,
                     }),
                     e.jsx(Q, {
                       label: "Ore complessive",
@@ -25820,10 +26111,10 @@ function Iv({ staffProfiles: t = {}, projects: n }) {
                       className: "desk-segments",
                       children: [
                         ["all", "Tutti"],
-                        ["active", "Attivi"],
-                        ["standby", "Standby"],
-                        ["stopped", "Fermi"],
-                        ["completed", "Conclusi"],
+                        ...PROJECT_STATUS_OPTIONS.map((I) => [
+                          zt(I.value),
+                          I.value,
+                        ]),
                       ].map(([I, S]) =>
                         e.jsx(
                           "button",
@@ -26710,8 +27001,8 @@ function Ov() {
                           }),
                           e.jsx("td", {
                             children: e.jsx("i", {
-                              className: `project-state ${String(N.project.stato).toLowerCase().replace(/\s/g, "-")}`,
-                              children: N.project.stato,
+                              className: `project-state ${projectStatusSlug(N.project.stato)}`,
+                              children: normalizeProjectStatus(N.project.stato),
                             }),
                           }),
                           e.jsx("td", { children: W(N.turnover) }),
@@ -26875,9 +27166,11 @@ function Rv({ tasks: t, hours: n }) {
       .sort((T, D) => D.hours - T.hours),
     y = Math.max(1, ...p.map((T) => T.hours)),
     O = Math.max(1, ...p.map((T) => T.open)),
-    k = ["Attivo", "Stand by", "Fermo", "Concluso"].map((T) => ({
-      state: T,
-      count: g.filter((D) => D.stato.toLowerCase() === T.toLowerCase()).length,
+    k = PROJECT_STATUS_OPTIONS.map((T) => ({
+      state: T.value,
+      count: g.filter(
+        (D) => normalizeProjectStatus(D.stato) === T.value,
+      ).length,
     })),
     z = [...new Set(t.map((T) => T.tipologia).filter(Boolean))]
       .map((T) => ({
@@ -27516,7 +27809,8 @@ const MinutesTasks = [
   { id: "minute-4", project: "P51", title: "Aggiornare tavola copertura con troppo pieno", owner: "Lisandro Leyra", priority: "Media", due: "2026-11-04" },
 ];
 const canEditStudioTools = (t) => ["senior_architect", "partner_architect", "property"].includes(t == null ? void 0 : t.appRole);
-const canManageMaterials = (t) => (t == null ? void 0 : t.id) === "fdiamanti";
+const canManageMaterials = (t) =>
+  (t == null ? void 0 : t.id) === "mmadaghiele" || !!(t != null && t.isDeveloper);
 function SupplierStudioIcon({ size: t = 22 }) {
   return e.jsxs("svg", { width: t, height: t, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.7", strokeLinecap: "round", strokeLinejoin: "round", children: [e.jsx("circle", { cx: "6.5", cy: "6", r: "2.3" }), e.jsx("path", { d: "M2.8 15.5v-2.8a3.7 3.7 0 0 1 7.4 0v2.8M13 4.5h7v4h-7zM13 10h7v4h-7zM13 15.5h7v4h-7z" })] });
 }
@@ -27784,6 +28078,14 @@ function _v() {
     });
   lv(v.textScale);
   C.useEffect(() => {
+    f((V) =>
+      V.map((Ee) => ({
+        ...Ee,
+        stato: normalizeProjectStatus(Ee.stato),
+      })),
+    );
+  }, []);
+  C.useEffect(() => {
     if (t.meta.source !== "excel") return;
     const mergeBy = (V, Ee, Ve) => [
       ...new Map([...V, ...Ee].map((At) => [At[Ve], At])).values(),
@@ -28022,15 +28324,22 @@ function _v() {
     ),
     R =
       Reception && ie === "oggi"
-        ? e.jsx(ReceptionTodayDemo, {})
+        ? e.jsxs(e.Fragment, {
+            children: [e.jsx(ReceptionTodayDemo, {}), e.jsx(PersonalAgendaPanel, {})],
+          })
         : DepartmentHead && ie === "oggi"
-          ? e.jsx(DepartmentTodayDemo, { type: DeptType })
+          ? e.jsxs(e.Fragment, {
+              children: [
+                e.jsx(DepartmentTodayDemo, { type: DeptType }),
+                e.jsx(PersonalAgendaPanel, {}),
+              ],
+            })
         : DepartmentHead && ie === "progetti"
           ? e.jsx(DepartmentProjectsDemo, { type: DeptType })
         : ie === "pacchi"
           ? e.jsx(PackagesDemo, {})
       : ie === "oggi"
-        ? e.jsx(hv, { tasks: o, hours: d, projects: j })
+        ? e.jsx(hv, { tasks: o, hours: d, projects: j, events: p })
         : ie === "taskmanager"
           ? e.jsx(pv, { tasks: o, setTasks: c, projects: j })
           : ie === "ore"
@@ -28550,9 +28859,19 @@ function Vv() {
     t &&
     n &&
     (Reception && b === "oggi"
-      ? e.jsx(ReceptionTodayDemo, {}, n.id)
+      ? e.jsxs(e.Fragment, {
+          children: [
+            e.jsx(ReceptionTodayDemo, {}, n.id),
+            e.jsx(PersonalAgendaPanel, {}),
+          ],
+        })
       : DepartmentHead && b === "oggi"
-        ? e.jsx(DepartmentTodayDemo, { type: DeptType }, n.id)
+        ? e.jsxs(e.Fragment, {
+            children: [
+              e.jsx(DepartmentTodayDemo, { type: DeptType }, n.id),
+              e.jsx(PersonalAgendaPanel, {}),
+            ],
+          })
       : DepartmentHead && b === "progetti"
         ? e.jsx(DepartmentProjectsDemo, { type: DeptType })
       : b === "pacchi"
