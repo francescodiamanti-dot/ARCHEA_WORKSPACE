@@ -8999,7 +8999,7 @@ var lc = cu.exports,
   dp,
   wd = lc;
 (dp = wd.createRoot), wd.hydrateRoot;
-const xa = "0.13.2",
+const xa = "0.14.1",
   te = ({ children: t, size: n = 22 }) =>
     e.jsx("svg", {
       width: n,
@@ -9792,6 +9792,9 @@ const Xt = {
     partner_architect: "Partner Architect",
     property: "Property",
     reception: "Reception",
+    interior_head: "Responsabile Interior Department",
+    concept_head: "Responsabile Concept Department",
+    visual_head: "Responsabile Visual Department",
   },
   Vn = [
     {
@@ -9834,6 +9837,36 @@ const Xt = {
       demoPassword: "demo",
       ruolo: "membro",
       appRole: "reception",
+      virtual: !0,
+    },
+    {
+      id: "scardia",
+      nome: "Simone Cardia",
+      email: "simone.cardia@archea.it",
+      demoPassword: "demo",
+      ruolo: "responsabile",
+      appRole: "interior_head",
+      department: "interior",
+      virtual: !0,
+    },
+    {
+      id: "mgamberi",
+      nome: "Marco Gamberi",
+      email: "marco.gamberi@archea.it",
+      demoPassword: "demo",
+      ruolo: "responsabile",
+      appRole: "concept_head",
+      department: "concept",
+      virtual: !0,
+    },
+    {
+      id: "afrongia",
+      nome: "Andrea Frongia",
+      email: "andrea.frongia@archea.it",
+      demoPassword: "demo",
+      ruolo: "responsabile",
+      appRole: "visual_head",
+      department: "visual",
       virtual: !0,
     },
   ],
@@ -13962,6 +13995,7 @@ function Rj() {
       s == null ? void 0 : s.appRole,
     ),
     receptionOnly = (s == null ? void 0 : s.appRole) === "reception",
+    departmentType = departmentTypeForViewer(s),
     o = [
       ...(l
         ? [
@@ -14012,6 +14046,19 @@ function Rj() {
         ya,
       ],
       [
+        "interior",
+        "Interior Department",
+        r ? "Interior requests and deliveries" : "Prenotazioni viste interior e consegne",
+        DepartmentStudioIcon,
+      ],
+      [
+        "concept",
+        "Concept Department",
+        r ? "Concept requests and deliveries" : "Prenotazioni concept e consegne",
+        DepartmentStudioIcon,
+      ],
+      ...(departmentType ? [["departmentmanager", "Project Manager", r ? "Department projects and resources" : "Progetti e risorse del reparto", Ss]] : []),
+      [
         "inarchea",
         "IN ARCHEA",
         r ? "Report, events and polls" : "Report, eventi e sondaggi",
@@ -14021,13 +14068,13 @@ function Rj() {
         "fornitori",
         r ? "Suppliers" : "Fornitori",
         r ? "Companies, contacts and technical documents" : "Aziende, referenti, listini e schede tecniche",
-        Ss,
+        SupplierStudioIcon,
       ],
       [
         "materioteca",
         r ? "Material library" : "Materioteca",
         r ? "Physical samples available in the studio" : "Catalogo dei campioni presenti nello studio",
-        ja,
+        MaterialStudioIcon,
       ],
       [
         "abacotecnico",
@@ -14036,7 +14083,9 @@ function Rj() {
         wt,
       ],
     ],
-    visibleMoreItems = receptionOnly
+    visibleMoreItems = departmentType
+      ? o.filter(([c]) => [departmentType, "departmentmanager", "inarchea"].includes(c))
+      : receptionOnly
       ? o.filter(([c]) => ["prenota", "fornitori", "materioteca"].includes(c))
       : o;
   return e.jsxs(e.Fragment, {
@@ -16208,32 +16257,24 @@ function Bj() {
                   }),
                 ],
               }),
-              Vn.map((m) => {
-                const x = ao.includes(m.id);
-                return e.jsxs(
-                  "button",
-                  {
-                    type: "button",
-                    className: r === m.email ? "on" : "",
-                    onClick: () => {
-                      i(m.email), l("demo"), c("");
-                    },
-                    children: [
-                      e.jsxs("span", {
-                        children: [
-                          m.nome,
-                          x && e.jsx("em", { children: "MASTER" }),
-                        ],
-                      }),
-                      e.jsx("small", {
-                        children: x
-                          ? `${Xt[m.appRole]} · Platform Owner`
-                          : Xt[m.appRole],
-                      }),
-                    ],
+              e.jsx("div", {
+                className: "demo-account-picker",
+                children: e.jsx(fe, {
+                  label: d ? "Demo profile" : "Profilo dimostrativo",
+                  value: (Vn.find((m) => m.email === r) || Vn[0]).id,
+                  searchable: !0,
+                  options: Vn.map((m) => ({
+                    value: m.id,
+                    label: m.nome,
+                    meta: ao.includes(m.id)
+                      ? `${Xt[m.appRole]} · Platform Owner`
+                      : Xt[m.appRole],
+                  })),
+                  onChange: (m) => {
+                    const x = Vn.find((j) => j.id === m);
+                    x && (i(x.email), l("demo"), c(""));
                   },
-                  m.id,
-                );
+                }),
               }),
             ],
           }),
@@ -22104,7 +22145,7 @@ function mv({ hours: t, setHours: n }) {
                       e.jsxs("div", {
                         className: "desk-bars",
                         children: [
-                          j.perProgetto.slice(0, 6).map((y) => {
+                          j.perProgetto.map((y) => {
                             var O;
                             return e.jsxs(
                               "div",
@@ -27409,12 +27450,40 @@ function Rv({ tasks: t, hours: n }) {
     ],
   });
 }
+const supplierDemo = (id, name, mark, category, city, projects, notes) => ({
+  id, name, mark, category, city, projects, notes,
+  website: `www.${id.replace(/[^a-z0-9]/g, "")}.it`,
+  contact: "Referente Contract",
+  email: `contract@${id.replace(/[^a-z0-9]/g, "")}-demo.it`,
+  phone: "+39 055 000 2026",
+  priceLists: [`${name} · Listino Contract 2026.pdf`],
+  sheets: [`${name} · Schede tecniche.pdf`, `${name} · Catalogo materiali.pdf`],
+});
 const SupplierSeed = [
-  { id: "schueco", name: "Schüco Italia", mark: "S", category: "Facciate e serramenti", city: "Padova", website: "www.schueco.it", contact: "Giulia Ferri", email: "g.ferri@schueco-demo.it", phone: "+39 049 000 1840", projects: ["P51 · Viola Park", "M86 · Stadio Flaminio"], priceLists: ["Listino sistemi alluminio 2026.pdf"], sheets: ["AWS 75.SI+ · Scheda tecnica.pdf", "FWS 50 · Capitolato.pdf"], notes: "Sistemi in alluminio per involucri ad alte prestazioni." },
-  { id: "mapei", name: "Mapei", mark: "M", category: "Adesivi e impermeabilizzazioni", city: "Milano", website: "www.mapei.com", contact: "Lorenzo Villa", email: "l.villa@mapei-demo.it", phone: "+39 02 000 2210", projects: ["H05 · Stadio di Pisa", "P52 · Social Housing Firenze"], priceLists: ["Listino edilizia 2026.xlsx"], sheets: ["Mapelastic · Scheda tecnica.pdf", "Keraflex Maxi S1.pdf"], notes: "Prodotti per posa, protezione e impermeabilizzazione." },
-  { id: "florim", name: "Florim", mark: "F", category: "Pavimenti e rivestimenti", city: "Fiorano Modenese", website: "www.florim.com", contact: "Chiara Bassi", email: "c.bassi@florim-demo.it", phone: "+39 0536 000 811", projects: ["O80 · Milanello Training Center"], priceLists: ["Listino Contract 2026.pdf"], sheets: ["Buildtech 2.0 · Dati tecnici.pdf"], notes: "Superfici ceramiche per interni, esterni e facciate ventilate." },
-  { id: "agc", name: "AGC Glass Europe", mark: "AG", category: "Vetri", city: "Milano", website: "www.agc-yourglass.com", contact: "Marco Rinaldi", email: "m.rinaldi@agc-demo.it", phone: "+39 02 000 7650", projects: ["M86 · Stadio Flaminio", "P51 · Viola Park"], priceLists: ["Listino vetri speciali 2026.pdf"], sheets: ["Stopray Vision 50 · Scheda.pdf", "Stratobel Security.pdf"], notes: "Vetri selettivi, stratificati e soluzioni per facciate." },
-  { id: "iguzzini", name: "iGuzzini", mark: "iG", category: "Illuminazione", city: "Recanati", website: "www.iguzzini.com", contact: "Sara Conti", email: "s.conti@iguzzini-demo.it", phone: "+39 071 000 410", projects: ["P51 · Viola Park", "I04 · Capannoncino"], priceLists: ["Listino Professional 2026.pdf"], sheets: ["Laser Blade XS.pdf", "Linealuce Compact.pdf"], notes: "Apparecchi architetturali per interni, esterni e paesaggio." },
+  supplierDemo("41zero42", "41 zero 42", "41", "Pavimenti e rivestimenti", "Fiorano Modenese", ["P51 · Viola Park", "O80 · Milanello Training Center"], "Superfici ceramiche per architettura e interior."),
+  supplierDemo("agenzia-bartolini", "Agenzia Bartolini", "GB", "Arredi e complementi", "Firenze", ["P51 · Viola Park", "P52 · Social Housing Firenze"], "Agenzia di rappresentanza per arredo, contract e finiture."),
+  supplierDemo("bici", "BICI", "BI", "Arredi e complementi", "Firenze", ["I04 · Capannoncino"], "Progetti e arredamento per spazi contract e residenziali."),
+  supplierDemo("botteganove", "Botteganove", "B9", "Mosaici e rivestimenti", "Nove", ["M86 · Stadio Flaminio"], "Mosaici artigianali e superfici decorative."),
+  supplierDemo("cantalupi", "Cantalupi Light Engineering", "CL", "Illuminazione", "Viareggio", ["P51 · Viola Park", "H05 · Stadio di Pisa"], "Light engineering e apparecchi su misura."),
+  supplierDemo("cimento", "Cimento", "CI", "Rivestimenti e superfici", "Venezia", ["P52 · Social Housing Firenze"], "Elementi leggeri in cemento per interni e facciate."),
+  supplierDemo("de-marchi", "De Marchi Verona", "DM", "Arredi e complementi", "Verona", ["O80 · Milanello Training Center"], "Soluzioni e finiture per l’interior contract."),
+  supplierDemo("dmm", "DMM", "DM", "Arredi e complementi", "Milano", ["M86 · Stadio Flaminio"], "Collezioni e complementi per spazi di rappresentanza."),
+  supplierDemo("ekinex", "Ekinex", "EX", "Domotica e impianti", "Novara", ["P51 · Viola Park", "I04 · Capannoncino"], "Controllo KNX, domotica e dispositivi di comando."),
+  supplierDemo("iscom", "Iscom", "IS", "Coperture e facciate", "Verona", ["P51 · Viola Park", "H05 · Stadio di Pisa"], "Sistemi metallici per coperture e involucri."),
+  supplierDemo("itlas", "ITLAS", "IT", "Pavimenti in legno", "Cordignano", ["P52 · Social Housing Firenze", "O80 · Milanello Training Center"], "Pavimenti e rivestimenti in legno certificato."),
+  supplierDemo("kilife", "Kilife", "K1", "Arredi e complementi", "Milano", ["I04 · Capannoncino"], "Complementi e soluzioni per l’interior contemporaneo."),
+  supplierDemo("lesko", "Lesko", "LE", "Illuminazione", "Milano", ["M86 · Stadio Flaminio"], "Illuminazione tecnica e decorativa per il contract."),
+  supplierDemo("lip-lighting", "LiP Lighting", "LiP", "Illuminazione", "Firenze", ["P51 · Viola Park", "I04 · Capannoncino"], "Progettazione illuminotecnica e apparecchi professionali."),
+  supplierDemo("luce5", "Luce5", "L5", "Illuminazione", "Firenze", ["H05 · Stadio di Pisa"], "Sistemi di luce architetturale e custom."),
+  supplierDemo("mafi", "Mafi", "MA", "Pavimenti in legno", "Austria", ["O80 · Milanello Training Center"], "Pavimenti naturali in legno per interior di alta gamma."),
+  supplierDemo("nextworks", "Nextworks", "NW", "Domotica e impianti", "Lucca", ["P51 · Viola Park", "M86 · Stadio Flaminio"], "Sistemi integrati, building automation e supervisione."),
+  supplierDemo("olev", "Olev", "OL", "Illuminazione", "Colceresa", ["P52 · Social Housing Firenze"], "Luce decorativa e sistemi fonoassorbenti illuminanti."),
+  supplierDemo("operaprima", "Operaprima", "OP", "Arredi e complementi", "Firenze", ["I04 · Capannoncino", "M86 · Stadio Flaminio"], "Ricerca e fornitura di prodotti per l’interior."),
+  supplierDemo("passamaneria-moderna", "Passamaneria Moderna", "PM", "Tessili", "Firenze", ["P51 · Viola Park"], "Passamanerie, tessuti e finiture decorative su misura."),
+  supplierDemo("roda", "Roda", "RO", "Arredi outdoor", "Varese", ["P51 · Viola Park", "O80 · Milanello Training Center"], "Arredi outdoor per hospitality e paesaggio."),
+  supplierDemo("schueco", "Schüco Italia", "S", "Facciate e serramenti", "Padova", ["P51 · Viola Park", "M86 · Stadio Flaminio"], "Sistemi in alluminio per involucri ad alte prestazioni."),
+  supplierDemo("studio-interni", "Studio D’Interni", "SI", "Arredi e complementi", "Firenze", ["P52 · Social Housing Firenze"], "Consulenza, arredi e coordinamento forniture interior."),
+  supplierDemo("secco-sistemi", "Secco Sistemi", "SE", "Facciate e serramenti", "Treviso", ["M86 · Stadio Flaminio", "I04 · Capannoncino"], "Profili sottili in acciaio, ottone e corten."),
 ];
 const MaterialSeed = [
   { id: "mat-01", name: "Buildtech 2.0 Bone", category: "Pavimenti", material: "Ceramica", brand: "Florim", location: "M02 · Cassetto 04", tone: "sand", finish: "Naturale opaco", format: "60 × 120 cm", code: "BT20-BONE-60120", performance: "R10 · Gres porcellanato · 9 mm", notes: "Campione grande disponibile anche in formato 120 × 120 cm." },
@@ -27447,6 +27516,16 @@ const MinutesTasks = [
   { id: "minute-4", project: "P51", title: "Aggiornare tavola copertura con troppo pieno", owner: "Lisandro Leyra", priority: "Media", due: "2026-11-04" },
 ];
 const canEditStudioTools = (t) => ["senior_architect", "partner_architect", "property"].includes(t == null ? void 0 : t.appRole);
+const canManageMaterials = (t) => (t == null ? void 0 : t.id) === "fdiamanti";
+function SupplierStudioIcon({ size: t = 22 }) {
+  return e.jsxs("svg", { width: t, height: t, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.7", strokeLinecap: "round", strokeLinejoin: "round", children: [e.jsx("circle", { cx: "6.5", cy: "6", r: "2.3" }), e.jsx("path", { d: "M2.8 15.5v-2.8a3.7 3.7 0 0 1 7.4 0v2.8M13 4.5h7v4h-7zM13 10h7v4h-7zM13 15.5h7v4h-7z" })] });
+}
+function MaterialStudioIcon({ size: t = 22 }) {
+  return e.jsxs("svg", { width: t, height: t, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.7", strokeLinecap: "round", strokeLinejoin: "round", children: [e.jsx("path", { d: "m4 7 8-4 8 4-8 4z" }), e.jsx("path", { d: "m4 12 8 4 8-4M4 17l8 4 8-4" })] });
+}
+function DepartmentStudioIcon({ size: t = 22 }) {
+  return e.jsxs("svg", { width: t, height: t, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.7", strokeLinecap: "round", strokeLinejoin: "round", children: [e.jsx("path", { d: "M4 19V8l8-4 8 4v11" }), e.jsx("path", { d: "M8 19v-5h8v5M8 9h.01M12 9h.01M16 9h.01" })] });
+}
 function StudioToolHeading({ title: t, subtitle: n, action: s = null, eyebrow: r = "ARCHEA WORKSPACE", back: a = !0 }) {
   const { setTab: i } = Y();
   return e.jsxs(e.Fragment, { children: [a && e.jsxs("button", { className: "studio-tool-mobile-back", onClick: () => i("altro"), children: [e.jsx(Re, {}), "Torna ad Altro"] }), e.jsxs("div", { className: "studio-tool-heading", children: [e.jsxs("div", { children: [e.jsx("small", { children: r }), e.jsx("h1", { children: t }), e.jsx("p", { children: n })] }), s] })] });
@@ -27460,9 +27539,9 @@ function SupplierDetail({ supplier: t, editable: n, onClose: s, onSave: r }) {
   ] }) });
 }
 function SuppliersDemo() {
-  const { viewer: t } = Y(), n = canEditStudioTools(t), [s, r] = ke("archea-demo-suppliers-v1", SupplierSeed), [i, a] = C.useState("all"), [l, o] = C.useState(null), c = [...new Set(s.map(d => d.category))], u = i === "all" ? s : s.filter(d => d.category === i);
-  const m = () => { const d = { ...SupplierSeed[0], id: en("supplier"), name: "Nuovo fornitore", mark: "NF", projects: [], priceLists: [], sheets: [], contact: "Da compilare", email: "", phone: "", notes: "Scheda demo appena creata." }; r(f => [d, ...f]); o(d.id); };
-  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Fornitori", subtitle: n ? "Archivio contatti, progetti, listini e schede tecniche. Puoi aggiornare le schede demo." : "Archivio consultabile di aziende e referenti dello studio.", action: n ? e.jsxs("button", { className: "desk-primary", onClick: m, children: [e.jsx(tt, {}), "Aggiungi fornitore"] }) : e.jsx("span", { className: "read-only-badge", children: "Sola lettura" }) }), e.jsx("div", { className: "studio-tool-filter", children: e.jsx(fe, { label: "Categoria", value: i, onChange: a, options: [{ value: "all", label: "Tutte le categorie", meta: `${s.length} aziende` }, ...c.map(d => ({ value: d, label: d }))] }) }), e.jsx("div", { className: "supplier-grid", children: u.map(d => e.jsxs("article", { className: "supplier-card", children: [e.jsx("button", { className: "supplier-logo", onClick: () => o(d.id), "aria-label": `Apri ${d.name}`, children: d.mark }), e.jsxs("div", { children: [e.jsx("small", { children: d.category }), e.jsx("h2", { children: d.name }), e.jsx("p", { children: d.notes }), e.jsxs("span", { children: [d.contact, " · ", d.city] })] }), e.jsx("button", { className: "supplier-open", onClick: () => o(d.id), children: "Apri scheda" })] }, d.id)) }), l && e.jsx(SupplierDetail, { supplier: s.find(d => d.id === l), editable: n, onClose: () => o(null), onSave: d => r(f => f.map(g => g.id === d.id ? d : g)) })] });
+  const { viewer: t } = Y(), n = canEditStudioTools(t), [s, r] = ke("archea-demo-suppliers-v2", SupplierSeed), [i, a] = C.useState("all"), [l, o] = C.useState("all"), [c, d] = C.useState(null), u = [...new Set(s.map(f => f.category))], m = [...new Set(s.flatMap(f => f.projects))], x = s.filter(f => (i === "all" || f.category === i) && (l === "all" || f.projects.includes(l)));
+  const j = () => { const f = { ...SupplierSeed[0], id: en("supplier"), name: "Nuovo fornitore", mark: "NF", projects: [], priceLists: [], sheets: [], contact: "Da compilare", email: "", phone: "", notes: "Scheda demo appena creata." }; r(g => [f, ...g]); d(f.id); };
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Fornitori", subtitle: n ? "Archivio contatti, progetti, listini e schede tecniche. Puoi aggiornare le schede demo." : "Archivio consultabile di aziende e referenti dello studio.", action: n ? e.jsxs("button", { className: "desk-primary", onClick: j, children: [e.jsx(tt, {}), "Aggiungi fornitore"] }) : e.jsx("span", { className: "read-only-badge", children: "Sola lettura" }) }), e.jsxs("div", { className: "studio-tool-filters supplier-filters", children: [e.jsx(fe, { label: "Categoria", value: i, onChange: a, options: [{ value: "all", label: "Tutte le categorie", meta: `${s.length} aziende` }, ...u.map(f => ({ value: f, label: f }))] }), e.jsx(fe, { label: "Progetto", value: l, onChange: o, searchable: !0, options: [{ value: "all", label: "Tutti i progetti", meta: `${m.length} commesse` }, ...m.map(f => ({ value: f, label: f }))] })] }), e.jsx("div", { className: "supplier-grid", children: x.map(f => e.jsxs("article", { className: "supplier-card", children: [e.jsx("button", { className: "supplier-logo", onClick: () => d(f.id), "aria-label": `Apri ${f.name}`, children: f.mark }), e.jsxs("div", { children: [e.jsx("small", { children: f.category }), e.jsx("h2", { children: f.name }), e.jsx("p", { children: f.notes }), e.jsxs("span", { children: [f.contact, " · ", f.city] })] }), e.jsx("button", { className: "supplier-open", onClick: () => d(f.id), children: "Apri scheda" })] }, f.id)) }), !x.length && e.jsx("p", { className: "desk-empty", children: "Nessun fornitore corrisponde ai filtri selezionati." }), c && e.jsx(SupplierDetail, { supplier: s.find(f => f.id === c), editable: n, onClose: () => d(null), onSave: f => r(g => g.map(b => b.id === f.id ? f : b)) })] });
 }
 function MaterialDetail({ item: t, editable: n, onClose: s, onSave: r }) {
   const [i, a] = C.useState(t), [l, o] = C.useState(!1);
@@ -27472,6 +27551,18 @@ function MaterialsDemo() {
   const { viewer: t } = Y(), n = canEditStudioTools(t), [s, r] = ke("archea-demo-materials-v1", MaterialSeed), [i, a] = C.useState("all"), [l, o] = C.useState("all"), [c, d] = C.useState("all"), [u, m] = C.useState(null), x = [...new Set(s.map(g => g.category))], j = [...new Set(s.map(g => g.material))], f = [...new Set(s.map(g => g.brand))], b = s.filter(g => (i === "all" || g.category === i) && (l === "all" || g.material === l) && (c === "all" || g.brand === c));
   const v = () => { const g = { ...MaterialSeed[0], id: en("material"), name: "Nuovo campione", code: "DA-COMPILARE", location: "Da assegnare", notes: "Campione aggiunto nella demo." }; r(h => [g, ...h]); m(g.id); };
   return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Materioteca", subtitle: "Catalogo digitale dei campioni fisici disponibili nello studio.", action: n ? e.jsxs("button", { className: "desk-primary", onClick: v, children: [e.jsx(tt, {}), "Aggiungi campione"] }) : e.jsx("span", { className: "read-only-badge", children: "Sola lettura" }) }), e.jsxs("div", { className: "studio-tool-filters", children: [e.jsx(fe, { label: "Categoria", value: i, onChange: a, options: [{ value: "all", label: "Tutte le categorie" }, ...x.map(g => ({ value: g, label: g }))] }), e.jsx(fe, { label: "Materiale", value: l, onChange: o, options: [{ value: "all", label: "Tutti i materiali" }, ...j.map(g => ({ value: g, label: g }))] }), e.jsx(fe, { label: "Azienda", value: c, onChange: d, options: [{ value: "all", label: "Tutte le aziende" }, ...f.map(g => ({ value: g, label: g }))] })] }), e.jsx("div", { className: "material-grid", children: b.map(g => e.jsxs("button", { className: "material-card", onClick: () => m(g.id), children: [e.jsx("span", { className: `material-preview ${g.tone}`, children: e.jsx("small", { children: g.code }) }), e.jsxs("span", { children: [e.jsx("small", { children: `${g.category} · ${g.material}` }), e.jsx("b", { children: g.name }), e.jsx("em", { children: g.brand }), e.jsx("i", { children: g.location })] })] }, g.id)) }), !b.length && e.jsx("p", { className: "desk-empty", children: "Nessun materiale corrisponde ai filtri." }), u && e.jsx(MaterialDetail, { item: s.find(g => g.id === u), editable: n, onClose: () => m(null), onSave: g => r(h => h.map(p => p.id === g.id ? g : p)) })] });
+}
+function MaterialDetailV2({ item: t, editable: n, onClose: s, onSave: r, startEditing: i = !1 }) {
+  const [a, l] = C.useState(t), [o, c] = C.useState(i), d = (u, m) => l(x => ({ ...x, [u]: m })), u = m => { var x; const j = (x = m.target.files) == null ? void 0 : x[0]; if (!j) return; const f = new FileReader(); f.onload = () => d("photo", String(f.result || "")); f.readAsDataURL(j); };
+  const m = [["Nome materiale", "name"], ["Codice", "code"], ["Categoria", "category"], ["Materiale", "material"], ["Azienda", "brand"], ["Posizione", "location"], ["Finitura", "finish"], ["Formato", "format"], ["Prestazioni", "performance"]];
+  return e.jsx(De, { title: a.name || "Nuovo materiale", subtitle: `${a.brand || "Azienda da indicare"} · ${a.category || "Categoria da indicare"}`, onClose: s, wide: !0, children: e.jsxs("div", { className: "material-detail", children: [e.jsxs("div", { className: `material-preview large ${a.photo ? "has-photo" : a.tone || "blank"}`, style: a.photo ? { backgroundImage: `url(${a.photo})` } : void 0, children: [e.jsx("span", { children: a.code || "NUOVO" }), o && e.jsxs("label", { className: "material-photo-upload", children: [e.jsx(oc, {}), a.photo ? "Sostituisci immagine" : "Carica immagine", e.jsx("input", { type: "file", accept: "image/*", hidden: !0, onChange: u })] })] }), e.jsxs("div", { className: "material-detail-copy", children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "CAMPIONE MATERIOTECA" }), e.jsx("h3", { children: a.name || "Nuovo materiale" }), e.jsx("p", { children: a.notes || "Compila tutti i dati del nuovo campione." })] }), n && !i && e.jsx("button", { className: "desk-small-button", onClick: () => c(!o), children: o ? "Annulla" : "Modifica" })] }), o ? e.jsxs("form", { className: "studio-edit-grid material-edit-grid", onSubmit: x => { x.preventDefault(); r(a); c(!1); }, children: [...m.map(([x,j]) => e.jsxs("label", { children: [x, e.jsx("input", { value: a[j] || "", onChange: f => d(j, f.target.value), required: ["name", "category", "material", "brand", "location"].includes(j) })] }, j)), e.jsxs("label", { className: "wide", children: ["Note", e.jsx("textarea", { value: a.notes || "", onChange: x => d("notes", x.target.value) })] }, "notes"), e.jsx("button", { className: "desk-primary", type: "submit", children: i ? "Aggiungi materiale" : "Salva campione" }, "save")] }) : e.jsxs("div", { className: "material-spec-grid", children: [["Azienda", a.brand], ["Categoria", a.category], ["Materiale", a.material], ["Finitura", a.finish], ["Formato", a.format], ["Prestazioni", a.performance], ["Posizione in materioteca", a.location], ["Codice", a.code]].map(([x,j]) => e.jsxs("article", { children: [e.jsx("small", { children: x }), e.jsx("b", { children: j || "—" })] }, x)) })] })] }) });
+}
+function MaterialsDemoV2() {
+  const { viewer: t } = Y(), n = canManageMaterials(t), [s, r] = ke("archea-demo-materials-v2", MaterialSeed), [i, a] = C.useState("all"), [l, o] = C.useState("all"), [c, d] = C.useState("all"), [u, m] = C.useState(null), [x, j] = C.useState(null), f = [...new Set(s.map(h => h.category))], b = [...new Set(s.map(h => h.material))], v = [...new Set(s.map(h => h.brand))], g = s.filter(h => (i === "all" || h.category === i) && (l === "all" || h.material === l) && (c === "all" || h.brand === c));
+  const p = () => { const h = { id: en("material"), name: "", category: "", material: "", brand: "", location: "", tone: "blank", finish: "", format: "", code: "", performance: "", notes: "", photo: "" }; j(h); m(h.id); };
+  const y = h => { r(O => O.some(k => k.id === h.id) ? O.map(k => k.id === h.id ? h : k) : [h, ...O]); j(null); };
+  const O = x && x.id === u ? x : s.find(h => h.id === u);
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: "Materioteca", subtitle: n ? "Catalogo digitale dei campioni fisici. Sei il gestore demo autorizzato ad aggiungere e modificare i materiali." : "Catalogo digitale dei campioni fisici disponibili nello studio. Le modifiche sono riservate al gestore della materioteca.", action: n ? e.jsxs("button", { className: "desk-primary", onClick: p, children: [e.jsx(tt, {}), "Aggiungi materiale"] }) : e.jsx("span", { className: "read-only-badge", children: "Sola lettura" }) }), e.jsxs("div", { className: "studio-tool-filters", children: [e.jsx(fe, { label: "Categoria", value: i, onChange: a, options: [{ value: "all", label: "Tutte le categorie" }, ...f.map(h => ({ value: h, label: h }))] }), e.jsx(fe, { label: "Materiale", value: l, onChange: o, options: [{ value: "all", label: "Tutti i materiali" }, ...b.map(h => ({ value: h, label: h }))] }), e.jsx(fe, { label: "Azienda", value: c, onChange: d, options: [{ value: "all", label: "Tutte le aziende" }, ...v.map(h => ({ value: h, label: h }))] })] }), e.jsx("div", { className: "material-grid", children: g.map(h => e.jsxs("button", { className: "material-card", onClick: () => m(h.id), children: [e.jsx("span", { className: `material-preview ${h.photo ? "has-photo" : h.tone}`, style: h.photo ? { backgroundImage: `url(${h.photo})` } : void 0, children: e.jsx("small", { children: h.code }) }), e.jsxs("span", { children: [e.jsx("small", { children: `${h.category} · ${h.material}` }), e.jsx("b", { children: h.name }), e.jsx("em", { children: h.brand }), e.jsx("i", { children: h.location })] })] }, h.id)) }), !g.length && e.jsx("p", { className: "desk-empty", children: "Nessun materiale corrisponde ai filtri." }), O && e.jsx(MaterialDetailV2, { item: O, editable: n, startEditing: !!x, onClose: () => { m(null); j(null); }, onSave: y })] });
 }
 function TechnicalAtlasDemo() {
   const [t, n] = C.useState(TechnicalSeed[0].id), [s, r] = C.useState(null), i = TechnicalSeed.find(o => o.id === t), a = i == null ? void 0 : i.points.find(o => o.id === s);
@@ -27490,6 +27581,45 @@ function PackagesDemo() {
 function SiteMinutesDemo({ project: t = "P51", onApprove: n = null, mobile: s = !1 }) {
   const [r,i] = C.useState(MinutesTasks.map(d => d.id)), [a,l] = C.useState(!1), [o,c] = C.useState("Riunione_cantiere_P51_27-10-2026.m4a"), d = () => { const u = MinutesTasks.filter(m => r.includes(m.id)).map((m,x) => ({ id: `${m.project}-AI-${String(Date.now() + x).slice(-4)}`, numero: `${m.project}-AI-${String(x + 1).padStart(2, "0")}`, progettoCodice: m.project, titolo: m.title, descrizione: m.title, assegnatario: m.owner, priorita: m.priority, inizio: "2026-10-27", scadenza: m.due, orario: "18:00", tipologia: "Verbale cantiere AI", commenti: "", linkServer: `Verbale ${o}`, shared: !0, completed: !1, validated: !1, notValidated: !1 })); n ? n(u) : localStorage.setItem("archea-ai-minutes-tasks", JSON.stringify(u)); l(!0); window.dispatchEvent(new CustomEvent("archea-ai-minutes-approved", { detail: u })); };
   return e.jsxs("section", { className: `site-minutes-ai${s ? " mobile" : ""}`, children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "ARCHEAI · VERBALE DI CANTIERE" }), e.jsx("h2", { children: "Da registrazione a task operative" }), e.jsx("p", { children: "Carica l’audio o la trascrizione: la demo produce un riepilogo e propone le attività da validare." })] }), e.jsxs("label", { className: "desk-primary", children: [e.jsx(oc, {}), "Carica verbale", e.jsx("input", { type: "file", accept: "audio/*,.txt,.doc,.docx", hidden: !0, onChange: u => { var m; const x = (m = u.target.files) == null ? void 0 : m[0]; x && c(x.name); } })] })] }), e.jsxs("div", { className: "minutes-source", children: [e.jsx("span", { children: "AI" }), e.jsxs("div", { children: [e.jsx("b", { children: o }), e.jsx("small", { children: "Trascrizione completata · 18 min 42 sec · 4 interlocutori" })] }), e.jsx("em", { children: "DEMO" })] }), e.jsxs("div", { className: "minutes-summary", children: [e.jsx("h3", { children: "Riassunto della riunione" }), e.jsx("p", { children: "Il sopralluogo ha confermato l’avanzamento della copertura del Padiglione B. Prima della posa definitiva dei lucernari devono essere verificati i davanzali della facciata nord e il raccordo dell’impermeabilizzazione. La Direzione Lavori richiede inoltre il campione colore del parapetto e l’aggiornamento della tavola con il troppo pieno della copertura verde." }), e.jsx("div", { children: ["Copertura verde: posa prevista dal 3 novembre", "Lucernari: dettaglio da approvare prima dell’ordine", "Parapetto: finitura bronzo da confermare", "Prossimo sopralluogo: 6 novembre · ore 10:00"].map(u => e.jsx("span", { children: u }, u)) })] }), e.jsxs("div", { className: "minutes-task-head", children: [e.jsxs("div", { children: [e.jsx("h3", { children: "Task estratte dall’AI" }), e.jsxs("p", { children: [r.length, " di ", MinutesTasks.length, " selezionate"] })] }), e.jsx("button", { className: "desk-primary", disabled: !r.length || a, onClick: d, children: a ? "Task inserite nel Task Manager" : "Valida e invia al Task Manager" })] }), e.jsx("div", { className: "minutes-task-list", children: MinutesTasks.map(u => e.jsxs("label", { className: r.includes(u.id) ? "selected" : "", children: [e.jsx("input", { type: "checkbox", checked: r.includes(u.id), onChange: () => i(m => m.includes(u.id) ? m.filter(x => x !== u.id) : [...m, u.id]) }), e.jsxs("span", { children: [e.jsx("b", { children: u.title }), e.jsxs("small", { children: [u.project, " · ", u.owner, " · scadenza ", u.due] })] }), e.jsx("em", { className: u.priority.toLowerCase(), children: u.priority })] }, u.id)) })] });
+}
+const DepartmentMeta = {
+  interior: { title: "Interior Department", unit: "viste interior", singular: "vista interior", lead: "Simone Cardia", accent: "Interior" },
+  concept: { title: "Concept Department", unit: "concept", singular: "concept", lead: "Marco Gamberi", accent: "Concept" },
+  visual: { title: "Visual Department", unit: "render", singular: "render", lead: "Andrea Frongia", accent: "Visual" },
+};
+const DepartmentSeed = {
+  interior: [
+    { id: "int-1", project: "P51", name: "Hospitality lounge · viste materiali", quantity: 6, requester: "Francesco Diamanti", delivery: "2026-10-30", assignee: "Giulia Neri", status: "in_progress", priority: "Alta", notes: "Definire palette, arredi loose e illuminazione decorativa." },
+    { id: "int-2", project: "M86", name: "Museo · percorso espositivo", quantity: 4, requester: "Alessandro Botrini", delivery: "2026-11-04", assignee: "Marta Rosi", status: "open", priority: "Media", notes: "Viste dalla hall e dalla sala Nervi." },
+    { id: "int-3", project: "O80", name: "Spogliatoi prima squadra", quantity: 8, requester: "Lisandro Leyra", delivery: "2026-11-08", assignee: "Da assegnare", status: "open", priority: "Alta", notes: "Coordinare falegnamerie e campioni pavimento." },
+    { id: "int-4", project: "I04", name: "Uffici · mock-up sala riunioni", quantity: 3, requester: "Francesco Diamanti", delivery: "2026-10-25", assignee: "Giulia Neri", status: "closed", priority: "Media", notes: "Consegna validata dal referente." },
+  ],
+  concept: [
+    { id: "con-1", project: "P63", name: "Cittadella dello Sport · concept masterplan", quantity: 5, requester: "Francesco Diamanti", delivery: "2026-10-31", assignee: "Elena Conti", status: "in_progress", priority: "Alta", notes: "Tre alternative di impianto e diagrammi dei flussi." },
+    { id: "con-2", project: "H42", name: "Leo France · identità architettonica", quantity: 4, requester: "Alessandro Botrini", delivery: "2026-11-03", assignee: "Paolo Ricci", status: "open", priority: "Media", notes: "Massing, facciata e principi materici." },
+    { id: "con-3", project: "P51", name: "Padiglione eventi · concept update", quantity: 3, requester: "Lisandro Leyra", delivery: "2026-11-06", assignee: "Da assegnare", status: "open", priority: "Alta", notes: "Recepire gli esiti dell’incontro con il cliente." },
+    { id: "con-4", project: "O32", name: "Castelfalfi · concept residenze", quantity: 7, requester: "Francesco Diamanti", delivery: "2026-10-24", assignee: "Elena Conti", status: "closed", priority: "Media", notes: "Concept approvato e archiviato." },
+  ],
+  visual: [
+    { id: "vis-1", project: "P51", name: "Viola Park · padiglione B", quantity: 8, requester: "Alessandro Botrini", delivery: "2026-10-30", assignee: "Andrea Frongia", status: "in_progress", priority: "Alta", notes: "Esterni golden hour e due viste interne." },
+    { id: "vis-2", project: "M86", name: "Stadio Flaminio · museo", quantity: 5, requester: "Francesco Diamanti", delivery: "2026-11-02", assignee: "Sara Adorno", status: "open", priority: "Alta", notes: "Fotoinserimenti museo e vista pensilina." },
+    { id: "vis-3", project: "H42", name: "Leo France · triangolo", quantity: 6, requester: "Giacomo Lissandron", delivery: "2026-11-05", assignee: "Mattia Borrione", status: "open", priority: "Media", notes: "Aggiornamento viste e fotoinserimenti." },
+    { id: "vis-4", project: "O55", name: "Yas Canal DCR1", quantity: 3, requester: "Alessandro Riccomi", delivery: "2026-10-22", assignee: "Carolyn Speljarie", status: "closed", priority: "Media", notes: "Due viste del bacino e una off-plan." },
+  ],
+};
+const departmentTypeForViewer = t => (t == null ? void 0 : t.department) || ({ interior_head: "interior", concept_head: "concept", visual_head: "visual" }[t == null ? void 0 : t.appRole]) || null;
+function useDepartmentRequests(t) { return ke(`archea-demo-department-${t}-v1`, DepartmentSeed[t]); }
+function DepartmentRequestsDemo({ type: t }) {
+  const { viewer: n, today: s } = Y(), r = DepartmentMeta[t], [i, a] = useDepartmentRequests(t), [l, o] = C.useState("all"), [c, d] = C.useState(!1), [u, m] = C.useState({ project: "", name: "", quantity: 1, delivery: s, assignee: "Da assegnare", priority: "Media", notes: "" }), x = ["senior_architect", "partner_architect", `${t}_head`].includes(n.appRole), j = i.filter(g => l === "all" || g.status === l), f = g => { g.preventDefault(); if (!u.project.trim() || !u.name.trim()) return; a(b => [{ ...u, id: en(t), project: u.project.trim().toUpperCase(), requester: n.nome, status: "open", quantity: Number(u.quantity) || 1 }, ...b]); d(!1); m({ project: "", name: "", quantity: 1, delivery: s, assignee: "Da assegnare", priority: "Media", notes: "" }); };
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: r.title, subtitle: `Prenotazioni, assegnazioni e consegne del reparto ${r.accent}.`, action: e.jsxs("button", { className: "desk-primary", onClick: () => d(!0), children: [e.jsx(tt, {}), `Prenota ${r.singular}`] }) }), e.jsxs("div", { className: "desk-stats department-stats", children: [e.jsx(Q, { label: "Richieste aperte", value: i.filter(g => g.status !== "closed").length }), e.jsx(Q, { label: "Unità da produrre", value: i.filter(g => g.status !== "closed").reduce((g,b) => g + b.quantity, 0) }), e.jsx(Q, { label: "In lavorazione", value: i.filter(g => g.status === "in_progress").length }), e.jsx(Q, { label: "Da assegnare", value: i.filter(g => g.assignee === "Da assegnare").length, tone: "warn" })] }), e.jsx("div", { className: "studio-tool-filter", children: e.jsx(fe, { label: "Stato richieste", value: l, onChange: o, options: [{ value: "all", label: "Tutte le richieste" }, { value: "open", label: "Aperte" }, { value: "in_progress", label: "In lavorazione" }, { value: "closed", label: "Consegnate" }] }) }), e.jsx("div", { className: "department-request-list", children: j.map(g => e.jsxs("article", { children: [e.jsxs("span", { className: "department-project", children: [e.jsx("small", { children: g.project }), e.jsx("b", { children: g.name }), e.jsx("em", { children: g.notes })] }), e.jsxs("span", { children: [e.jsx("small", { children: r.unit.toUpperCase() }), e.jsx("b", { children: g.quantity })] }), e.jsxs("span", { children: [e.jsx("small", { children: "ASSEGNATA A" }), e.jsx("b", { children: g.assignee })] }), e.jsxs("span", { children: [e.jsx("small", { children: "CONSEGNA" }), e.jsx("b", { children: Dt(g.delivery) })] }), e.jsx("button", { className: `department-status ${g.status}`, disabled: !x, onClick: () => x && a(b => b.map(v => v.id === g.id ? { ...v, status: v.status === "open" ? "in_progress" : v.status === "in_progress" ? "closed" : "open" } : v)), children: g.status === "closed" ? "Consegnata" : g.status === "in_progress" ? "In lavorazione" : "Aperta" })] }, g.id)) }), c && e.jsx(De, { title: `Nuova richiesta · ${r.title}`, subtitle: `Prenota una nuova ${r.singular} per un progetto.`, onClose: () => d(!1), children: e.jsxs("form", { className: "studio-edit-grid", onSubmit: f, children: [e.jsxs("label", { children: ["Codice progetto", e.jsx("input", { value: u.project, onChange: g => m({ ...u, project: g.target.value }), required: !0 })] }), e.jsxs("label", { children: ["Numero", e.jsx("input", { type: "number", min: 1, value: u.quantity, onChange: g => m({ ...u, quantity: g.target.value }) })] }), e.jsxs("label", { className: "wide", children: ["Titolo richiesta", e.jsx("input", { value: u.name, onChange: g => m({ ...u, name: g.target.value }), required: !0 })] }), e.jsxs("label", { children: ["Consegna", e.jsx("input", { type: "date", value: u.delivery, onChange: g => m({ ...u, delivery: g.target.value }) })] }), e.jsxs("label", { children: ["Priorità", e.jsx("select", { value: u.priority, onChange: g => m({ ...u, priority: g.target.value }), children: ["Bassa", "Media", "Alta"].map(g => e.jsx("option", { children: g }, g)) })] }), e.jsxs("label", { className: "wide", children: ["Indicazioni", e.jsx("textarea", { value: u.notes, onChange: g => m({ ...u, notes: g.target.value }) })] }), e.jsx("button", { className: "desk-primary", type: "submit", children: "Salva prenotazione" })] }) })] });
+}
+function DepartmentTodayDemo({ type: t }) {
+  const n = DepartmentMeta[t], [s] = useDepartmentRequests(t), r = s.filter(o => o.status !== "closed"), i = r.reduce((o,c) => o + c.quantity, 0), a = r.slice().sort((o,c) => o.delivery.localeCompare(c.delivery));
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: `${n.title} · Oggi`, subtitle: `Ordine del giorno, consegne e attività operative coordinate da ${n.lead}.`, eyebrow: `ARCHEA WORKSPACE · ${n.accent.toUpperCase()}` }), e.jsxs("div", { className: "desk-stats department-stats", children: [e.jsx(Q, { label: "Richieste attive", value: r.length }), e.jsx(Q, { label: n.unit, value: i }), e.jsx(Q, { label: "In lavorazione", value: r.filter(o => o.status === "in_progress").length }), e.jsx(Q, { label: "Consegne entro 7 giorni", value: r.filter(o => o.delivery <= "2026-11-04").length, tone: "warn" })] }), e.jsxs("section", { className: "desk-panel department-agenda", children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "ORDINE DEL GIORNO" }), e.jsx("h2", { children: "Priorità e consegne" })] }), e.jsx("strong", { children: n.lead })] }), e.jsx("div", { children: a.map((o,c) => e.jsxs("article", { children: [e.jsx("i", { children: String(c + 1).padStart(2, "0") }), e.jsxs("span", { children: [e.jsxs("b", { children: [o.project, " · ", o.name] }), e.jsxs("small", { children: [o.assignee, " · ", o.quantity, " ", n.unit, " · ", o.priority] })] }), e.jsx("time", { children: Dt(o.delivery) })] }, o.id)) })] })] });
+}
+function DepartmentProjectsDemo({ type: t, manager: n = !1 }) {
+  const s = DepartmentMeta[t], [r,i] = useDepartmentRequests(t), [a,l] = C.useState(null), o = [...new Set(r.map(d => d.project))].map(d => { const u = r.filter(m => m.project === d); return { code: d, requests: u.length, quantity: u.reduce((m,x) => m + x.quantity, 0), open: u.filter(m => m.status !== "closed").length, team: [...new Set(u.map(m => m.assignee).filter(m => m !== "Da assegnare"))] }; });
+  return e.jsxs(e.Fragment, { children: [e.jsx(StudioToolHeading, { title: n ? `Project Manager · ${s.accent}` : `Progetti · ${s.accent}`, subtitle: n ? `Gestione delle commesse e delle risorse del reparto ${s.accent}.` : `Carico ${s.unit}, assegnazioni e avanzamento per progetto.`, action: n ? e.jsxs("button", { className: "desk-primary", onClick: () => l("resources"), children: [e.jsx(tt, {}), "Aggiungi risorsa"] }) : null }), e.jsx("div", { className: "department-project-grid", children: o.map(d => e.jsxs("article", { children: [e.jsxs("header", { children: [e.jsx("small", { children: d.code }), e.jsx("span", { children: d.open ? `${d.open} attive` : "Completato" })] }), e.jsxs("div", { children: [e.jsx("b", { children: d.quantity }), e.jsx("small", { children: s.unit })] }), e.jsxs("footer", { children: [e.jsxs("span", { children: [d.requests, " richieste"] }), e.jsx("span", { children: d.team.join(", ") || "Da assegnare" })] })] }, d.code)) }), n && e.jsxs("section", { className: "desk-panel department-team", children: [e.jsxs("header", { children: [e.jsxs("div", { children: [e.jsx("small", { children: "ORGANICO DEL REPARTO" }), e.jsx("h2", { children: "Risorse e carico attuale" })] }), e.jsx("strong", { children: "⋮⋮" })] }), e.jsx("div", { children: [[s.lead, "Responsabile", 8], [t === "concept" ? "Elena Conti" : t === "interior" ? "Giulia Neri" : "Sara Adorno", "Senior", 6], [t === "concept" ? "Paolo Ricci" : t === "interior" ? "Marta Rosi" : "Mattia Borrione", "Specialist", 5]].map(([d,u,m]) => e.jsxs("article", { children: [e.jsx("i", { children: Lt(d) }), e.jsxs("span", { children: [e.jsx("b", { children: d }), e.jsx("small", { children: u })] }), e.jsxs("em", { children: [m, " attività"] })] }, d)) })] }), a && e.jsx(De, { title: "Aggiungi risorsa al reparto", subtitle: `Demo di gestione organico · ${s.title}`, onClose: () => l(null), children: e.jsxs("div", { className: "studio-edit-grid", children: [e.jsxs("label", { children: ["Nome e cognome", e.jsx("input", { placeholder: "Nuova risorsa" })] }), e.jsxs("label", { children: ["Ruolo", e.jsx("input", { placeholder: "Designer / Specialist" })] }), e.jsx("button", { className: "desk-primary", onClick: () => l(null), children: "Aggiungi alla demo" })] }) })] });
 }
 function Mv() {
   const [t, n] = C.useState(null),
@@ -27735,6 +27865,8 @@ function _v() {
   const A = ["senior_architect", "partner_architect"].includes(n.appRole),
     w = n.appRole === "property",
     Reception = n.appRole === "reception",
+    DepartmentHead = ["interior_head", "concept_head", "visual_head"].includes(n.appRole),
+    DeptType = departmentTypeForViewer(n),
     B = [
       ...o
         .filter((V) => V.approvalPending && V.projectLeadId === n.id)
@@ -27807,9 +27939,11 @@ function _v() {
       ["prenota", "Prenotazioni", Wt, "Auto, materiali e sale"],
       ["bim", "BIM Portal", ga, "Guide Revit e standard condivisi"],
       ["visual", "Visual Department", ya, "Richieste render e consegne"],
+      ["interior", "Interior Department", DepartmentStudioIcon, "Prenotazioni viste interior e consegne"],
+      ["concept", "Concept Department", DepartmentStudioIcon, "Prenotazioni concept e consegne"],
       ["inarchea", "IN ARCHEA", va, "Report, eventi e sondaggi"],
-      ["fornitori", "Fornitori", Ss, "Aziende, referenti, listini e schede"],
-      ["materioteca", "Materioteca", ja, "Catalogo dei campioni dello studio"],
+      ["fornitori", "Fornitori", SupplierStudioIcon, "Aziende, referenti, listini e schede"],
+      ["materioteca", "Materioteca", MaterialStudioIcon, "Catalogo dei campioni dello studio"],
       ["abacotecnico", "Abaco tecnico", wt, "Dettagli costruiti e stratigrafie"],
     ],
     X = [
@@ -27819,8 +27953,8 @@ function _v() {
       ["calendario", "Calendario", Wt, "Agenda e appuntamenti"],
       ["chat", "Chat", Td, "Messaggi interni"],
       ["bio", "Organico", Xn, "Anagrafica e contratti"],
-      ["fornitori", "Fornitori", Ss, "Aziende, referenti, listini e schede"],
-      ["materioteca", "Materioteca", ja, "Catalogo dei campioni dello studio"],
+      ["fornitori", "Fornitori", SupplierStudioIcon, "Aziende, referenti, listini e schede"],
+      ["materioteca", "Materioteca", MaterialStudioIcon, "Catalogo dei campioni dello studio"],
       ["abacotecnico", "Abaco tecnico", wt, "Dettagli costruiti e stratigrafie"],
     ],
     ReceptionCatalog = [
@@ -27829,12 +27963,24 @@ function _v() {
       ["calendario", "Calendario", Wt, "Riunioni e sale da preparare"],
       ["chat", "Chat", Td, "Messaggi interni dello studio"],
       ["prenota", "Prenotazioni", Wt, "Auto, materiali e sale"],
-      ["fornitori", "Fornitori", Ss, "Rubrica aziende in sola lettura"],
-      ["materioteca", "Materioteca", ja, "Catalogo campioni in sola lettura"],
+      ["fornitori", "Fornitori", SupplierStudioIcon, "Rubrica aziende in sola lettura"],
+      ["materioteca", "Materioteca", MaterialStudioIcon, "Catalogo campioni in sola lettura"],
     ],
-    M = Reception ? ReceptionCatalog : w ? X : D,
+    DepartmentCatalog = DepartmentHead ? [
+      ["oggi", "Oggi", bx, `Agenda ${DepartmentMeta[DeptType].accent}`],
+      ["progetti", "Progetti", Ss, `Commesse e ${DepartmentMeta[DeptType].unit}`],
+      ["calendario", "Calendario", Wt, "Agenda e appuntamenti"],
+      ["ore", "Ore", Ur, "Registrazione e analisi ore"],
+      ["chat", "Chat", Td, "Messaggi interni dello studio"],
+      ["note", "Note", An, "Taccuino per progetto"],
+      [DeptType, DepartmentMeta[DeptType].title, DepartmentStudioIcon, "Prenotazioni, assegnazioni e consegne"],
+      ["departmentmanager", "Project Manager", Ss, `Gestione progetti e organico ${DepartmentMeta[DeptType].accent}`],
+    ] : [],
+    M = Reception ? ReceptionCatalog : DepartmentHead ? DepartmentCatalog : w ? X : D,
     q = Reception
       ? ["oggi", "pacchi", "calendario", "chat"]
+      : DepartmentHead
+      ? ["oggi", "progetti", "calendario", "ore", "chat", "note"]
       : w
       ? X.map((V) => V[0])
       : [
@@ -27877,6 +28023,10 @@ function _v() {
     R =
       Reception && ie === "oggi"
         ? e.jsx(ReceptionTodayDemo, {})
+        : DepartmentHead && ie === "oggi"
+          ? e.jsx(DepartmentTodayDemo, { type: DeptType })
+        : DepartmentHead && ie === "progetti"
+          ? e.jsx(DepartmentProjectsDemo, { type: DeptType })
         : ie === "pacchi"
           ? e.jsx(PackagesDemo, {})
       : ie === "oggi"
@@ -27913,7 +28063,13 @@ function _v() {
                                 : ie === "bim"
                                   ? e.jsx(Sv, {})
                                   : ie === "visual"
-                                    ? e.jsx(Cv, {})
+                                    ? DepartmentHead ? e.jsx(DepartmentRequestsDemo, { type: "visual" }) : e.jsx(Cv, {})
+                                    : ie === "interior"
+                                      ? e.jsx(DepartmentRequestsDemo, { type: "interior" })
+                                    : ie === "concept"
+                                      ? e.jsx(DepartmentRequestsDemo, { type: "concept" })
+                                    : ie === "departmentmanager" && DepartmentHead
+                                      ? e.jsx(DepartmentProjectsDemo, { type: DeptType, manager: !0 })
                                     : ie === "prenota"
                                       ? e.jsx(kv, {})
                                       : ie === "inarchea"
@@ -27921,7 +28077,7 @@ function _v() {
                         : ie === "fornitori"
                           ? e.jsx(SuppliersDemo, {})
                           : ie === "materioteca"
-                            ? e.jsx(MaterialsDemo, {})
+                            ? e.jsx(MaterialsDemoV2, {})
                             : ie === "abacotecnico"
                               ? e.jsx(TechnicalAtlasDemo, {})
                         : ie === "developer" && n.isDeveloper
@@ -28307,6 +28463,14 @@ const $v = [
     ["pacchi", "packages", wt],
     ["calendario", "calendar", Wt],
     ["altro", "more", dc],
+  ],
+  DepartmentMobile = [
+    ["oggi", "today", Wt],
+    ["progetti", "projects", Ss],
+    ["chat", "chat", Td],
+    ["ore", "hours", Ur],
+    ["calendario", "calendar", Wt],
+    ["altro", "more", dc],
   ];
 function Vv() {
   const {
@@ -28328,10 +28492,16 @@ function Vv() {
     ),
     j = (n == null ? void 0 : n.appRole) === "architect",
     Reception = (n == null ? void 0 : n.appRole) === "reception",
+    DepartmentHead = ["interior_head", "concept_head", "visual_head"].includes(n == null ? void 0 : n.appRole),
+    DeptType = departmentTypeForViewer(n),
     f = ["avanzamento", "contabilita", "insight", "calendario", "bio"],
     g = ["avanzamento", "bio"],
     b = Reception
       ? ["oggi", "pacchi", "calendario", "prenota", "fornitori", "materioteca"].includes(s)
+        ? s
+        : "oggi"
+      : DepartmentHead
+      ? ["oggi", "progetti", "chat", "ore", "calendario", "note", DeptType, "departmentmanager", "inarchea"].includes(s)
         ? s
         : "oggi"
       : m
@@ -28342,12 +28512,14 @@ function Vv() {
           g.includes(s)
         ? "oggi"
         : s,
-    v = Reception ? ReceptionMobile : m ? Uv : x ? Fv : Lv,
+    v = Reception ? ReceptionMobile : DepartmentHead ? DepartmentMobile : m ? Uv : x ? Fv : Lv,
     h = Reception
       ? ["prenota", "fornitori", "materioteca"]
+      : DepartmentHead
+      ? ["note", DeptType, "departmentmanager", "inarchea"]
       : x
-      ? ["ore", "calendario", "insight", "prenota", "inarchea", "bim", "visual", "fornitori", "materioteca", "abacotecnico"]
-      : ["calendario", "prenota", "inarchea", "bim", "visual", "fornitori", "materioteca", "abacotecnico"],
+      ? ["ore", "calendario", "insight", "prenota", "inarchea", "bim", "visual", "interior", "concept", "fornitori", "materioteca", "abacotecnico"]
+      : ["calendario", "prenota", "inarchea", "bim", "visual", "interior", "concept", "fornitori", "materioteca", "abacotecnico"],
     p = v.some(([E]) => E === b) ? b : h.includes(b) ? "altro" : v[0][0],
     y = Math.max(
       0,
@@ -28379,6 +28551,10 @@ function Vv() {
     n &&
     (Reception && b === "oggi"
       ? e.jsx(ReceptionTodayDemo, {}, n.id)
+      : DepartmentHead && b === "oggi"
+        ? e.jsx(DepartmentTodayDemo, { type: DeptType }, n.id)
+      : DepartmentHead && b === "progetti"
+        ? e.jsx(DepartmentProjectsDemo, { type: DeptType })
       : b === "pacchi"
         ? e.jsx(PackagesDemo, {})
       : b === "oggi"
@@ -28408,11 +28584,17 @@ function Vv() {
                             : b === "bim"
                               ? e.jsx(Kj, {})
                             : b === "visual"
-                                ? e.jsx(Qj, {})
+                                ? DepartmentHead ? e.jsx(DepartmentRequestsDemo, { type: "visual" }) : e.jsx(Qj, {})
+                              : b === "interior"
+                                ? e.jsx(DepartmentRequestsDemo, { type: "interior" })
+                              : b === "concept"
+                                ? e.jsx(DepartmentRequestsDemo, { type: "concept" })
+                              : b === "departmentmanager" && DepartmentHead
+                                ? e.jsx(DepartmentProjectsDemo, { type: DeptType, manager: !0 })
                                 : b === "fornitori"
                                   ? e.jsx(SuppliersDemo, {})
                                   : b === "materioteca"
-                                    ? e.jsx(MaterialsDemo, {})
+                                    ? e.jsx(MaterialsDemoV2, {})
                                     : b === "abacotecnico"
                                       ? e.jsx(TechnicalAtlasDemo, {})
                                       : e.jsx(Rj, {}));

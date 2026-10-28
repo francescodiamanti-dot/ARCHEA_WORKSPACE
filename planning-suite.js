@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'archea-planning-suite-v3';
-const VERSION = '0.13.2';
+const VERSION = '0.14.1';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 
@@ -12,6 +12,9 @@ const PLATFORM_PROFILES = {
   client:{ label:'Cliente · sola lettura', professional:'Cliente', base:'lleyra', description:'Cronoprogramma filtrato senza dati interni.', color:'#7d8580' },
   platform_owner:{ label:'Platform Owner', professional:'Partner Architect', base:'fdiamanti', description:'Configurazione, utenti, permessi e log.', color:'#252a27' },
   reception:{ label:'Reception', professional:'Segreteria', base:'alaurini', description:'Agenda, sale riunioni, pacchi e accoglienza.', color:'#8a918c' },
+  interior_head:{ label:'Responsabile Interior', professional:'Interior Department', base:'scardia', description:'Richieste interior, viste, risorse e consegne.', color:'#7d887f' },
+  concept_head:{ label:'Responsabile Concept', professional:'Concept Department', base:'mgamberi', description:'Concept, priorità, assegnazioni e consegne.', color:'#707b73' },
+  visual_head:{ label:'Responsabile Visual', professional:'Visual Department', base:'afrongia', description:'Render, artisti, priorità e consegne.', color:'#626c66' },
 };
 const DEMO_ACCOUNTS = [
   { id:'resource', name:'Lisandro Leyra', email:'risorsa@demo.archea.it' },
@@ -22,6 +25,9 @@ const DEMO_ACCOUNTS = [
   { id:'client', name:'ACF Fiorentina', email:'cliente@demo.archea.it' },
   { id:'platform_owner', name:'Francesco Diamanti', email:'owner@demo.archea.it' },
   { id:'reception', name:'Alessandra Laurini', email:'reception@demo.archea.it' },
+  { id:'interior_head', name:'Simone Cardia', email:'interior@demo.archea.it' },
+  { id:'concept_head', name:'Marco Gamberi', email:'concept@demo.archea.it' },
+  { id:'visual_head', name:'Andrea Frongia', email:'visual@demo.archea.it' },
 ];
 
 const day = value => new Date(`${value}T12:00:00Z`);
@@ -761,6 +767,7 @@ function profileSwitcher(){
 function injectDemoAccounts(){
   const container=document.querySelector('.demo-accounts');
   if(!container)return;
+  if(container.querySelector('.demo-account-picker'))return;
   const existing=[...container.querySelectorAll(':scope > button')];
   const alreadyComplete=existing.length===DEMO_ACCOUNTS.length&&existing.every(button=>button.hasAttribute('data-login-profile'));
   if(alreadyComplete)return;
@@ -777,9 +784,14 @@ function injectDemoAccounts(){
     container.append(button);
   });
 }
+function effectiveShellProfile(){
+  const signedIn=sessionStorage.getItem('archea-demo-user');
+  return ({fdiamanti:'platform_owner',abotrini:'project_manager',lleyra:'resource',property:'finance_direction',alaurini:'reception',scardia:'interior_head',mgamberi:'concept_head',afrongia:'visual_head'}[signedIn])||profile();
+}
 function applyShellPermissions(){
-  const allowed={resource:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],project_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Cantiere','Contabilità','Insight','Calendario','Altro','Pianificazione'],resource_manager:['Oggi','Chat','Calendario','Pianificazione'],pmo_admin:['Oggi','Progetti','Task Manager','Insight','Calendario','Pianificazione'],finance_direction:['Oggi','Progetti','Contabilità','Insight','Calendario','Organico','Pianificazione'],client:['Pianificazione'],reception:['Oggi','Pacchi','Calendario','Chat','Altro'],platform_owner:null}[profile()];
-  document.documentElement.dataset.apsProfile=profile();
+  const effectiveProfile=effectiveShellProfile();
+  const allowed={resource:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],project_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Cantiere','Contabilità','Insight','Calendario','Altro','Pianificazione'],resource_manager:['Oggi','Chat','Calendario','Pianificazione'],pmo_admin:['Oggi','Progetti','Task Manager','Insight','Calendario','Pianificazione'],finance_direction:['Oggi','Progetti','Contabilità','Insight','Calendario','Organico','Pianificazione'],client:['Pianificazione'],reception:['Oggi','Pacchi','Calendario','Chat','Altro'],interior_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],concept_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],visual_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],platform_owner:null}[effectiveProfile];
+  document.documentElement.dataset.apsProfile=effectiveProfile;
   document.querySelectorAll('button').forEach(button=>{
     if(button.closest('#archea-planning-suite')||button.closest('.aps-login-accounts'))return;
     const label=button.textContent.trim();
@@ -813,7 +825,9 @@ function applyRuntimePolish(){
 
 function injectLaunchers() {
   if(document.querySelector('.login-screen')) closeSuite(false);
-  if(['resource','reception'].includes(profile())){
+  const shellRoleText=document.querySelector('.desk-sidebar')?.textContent||'';
+  const restrictedDepartmentShell=/Responsabile (Interior|Concept|Visual) Department/.test(shellRoleText);
+  if(['resource','reception','interior_head','concept_head','visual_head'].includes(effectiveShellProfile())||restrictedDepartmentShell){
     document.querySelector('.aps-desktop-launcher')?.remove();
     document.querySelector('.aps-desktop-subnav')?.remove();
     document.querySelector('.aps-mobile-launcher')?.remove();
