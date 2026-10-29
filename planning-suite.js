@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'archea-planning-suite-v3';
-const VERSION = '0.14.2';
+const VERSION = '0.14.3';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 
@@ -16,6 +16,7 @@ const PLATFORM_PROFILES = {
   concept_head:{ label:'Responsabile Concept', professional:'Concept Department', base:'mgamberi', description:'Concept, priorità, assegnazioni e consegne.', color:'#707b73' },
   visual_head:{ label:'Responsabile Visual', professional:'Visual Department', base:'afrongia', description:'Render, artisti, priorità e consegne.', color:'#626c66' },
   material_manager:{ label:'Architect · Gestore Materioteca', professional:'Architect', base:'mmadaghiele', description:'Attività da Architect e gestione completa della materioteca.', color:'#78827b' },
+  hr_manager:{ label:'HR Manager', professional:'Human Resources', base:'fdiamanti', description:'Persone, colloqui, appuntamenti, organico e insight HR.', color:'#7b8580' },
 };
 const DEMO_ACCOUNTS = [
   { id:'resource', name:'Lisandro Leyra', email:'risorsa@demo.archea.it' },
@@ -30,6 +31,7 @@ const DEMO_ACCOUNTS = [
   { id:'concept_head', name:'Marco Gamberi', email:'concept@demo.archea.it' },
   { id:'visual_head', name:'Andrea Frongia', email:'visual@demo.archea.it' },
   { id:'material_manager', name:'Mirko Madaghiele', email:'mirko.madaghiele@archea.it' },
+  { id:'hr_manager', name:'Elisabetta Pietrelli', email:'elisabetta.pietrelli@archea.it' },
 ];
 
 const day = value => new Date(`${value}T12:00:00Z`);
@@ -171,6 +173,10 @@ const loadData = () => {
   catch { return structuredClone(demoData); }
 };
 let state = loadData();
+if (!state.users?.some(user => user.id === 'hr_manager')) {
+  state.users ||= [];
+  state.users.push({ id:'hr_manager', name:'Elisabetta Pietrelli', email:'elisabetta.pietrelli@archea.it', profile:'hr_manager', professional:'Human Resources', company:'Archea Associati', active:true, projects:[] });
+}
 let undoStack = [];
 let currentTab = 'dashboard';
 let selectedProject = state.projects[0].code;
@@ -298,6 +304,7 @@ function allowedPlanningTabs() {
     finance_direction:['dashboard','portfolio','finance'],
     client:['dashboard','plan'],
     platform_owner:['dashboard','plan','resources','timesheets','baseline','portfolio','finance','admin','users','share'],
+    hr_manager:[],
   }[profile()] || [];
 }
 
@@ -788,11 +795,11 @@ function injectDemoAccounts(){
 }
 function effectiveShellProfile(){
   const signedIn=sessionStorage.getItem('archea-demo-user');
-  return ({fdiamanti:'platform_owner',abotrini:'project_manager',lleyra:'resource',property:'finance_direction',alaurini:'reception',scardia:'interior_head',mgamberi:'concept_head',afrongia:'visual_head',mmadaghiele:'material_manager'}[signedIn])||profile();
+  return sessionStorage.getItem(PROFILE_KEY)||({fdiamanti:'platform_owner',abotrini:'project_manager',lleyra:'resource',property:'finance_direction',alaurini:'reception',scardia:'interior_head',mgamberi:'concept_head',afrongia:'visual_head',mmadaghiele:'material_manager'}[signedIn])||profile();
 }
 function applyShellPermissions(){
   const effectiveProfile=effectiveShellProfile();
-  const allowed={resource:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],material_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],project_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Cantiere','Contabilità','Insight','Calendario','Altro','Pianificazione'],resource_manager:['Oggi','Chat','Calendario','Pianificazione'],pmo_admin:['Oggi','Progetti','Task Manager','Insight','Calendario','Pianificazione'],finance_direction:['Oggi','Progetti','Contabilità','Insight','Calendario','Organico','Pianificazione'],client:['Pianificazione'],reception:['Oggi','Pacchi','Calendario','Chat','Altro'],interior_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],concept_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],visual_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],platform_owner:null}[effectiveProfile];
+  const allowed={resource:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],material_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Calendario','Altro'],project_manager:['Oggi','Progetti','Task Manager','Note','Chat','Ore','Cantiere','Contabilità','Insight','Calendario','Altro','Pianificazione'],resource_manager:['Oggi','Chat','Calendario','Pianificazione'],pmo_admin:['Oggi','Progetti','Task Manager','Insight','Calendario','Pianificazione'],finance_direction:['Oggi','Progetti','Contabilità','Insight','Calendario','Organico','Pianificazione'],client:['Pianificazione'],reception:['Oggi','Pacchi','Calendario','Chat','Altro'],interior_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],concept_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],visual_head:['Oggi','Progetti','Note','Chat','Ore','Calendario','Altro'],hr_manager:['Oggi','Chat','Calendario','Organico','Ore','Insight','Altro'],platform_owner:null}[effectiveProfile];
   document.documentElement.dataset.apsProfile=effectiveProfile;
   document.querySelectorAll('button').forEach(button=>{
     if(button.closest('#archea-planning-suite')||button.closest('.aps-login-accounts'))return;
@@ -829,7 +836,7 @@ function injectLaunchers() {
   if(document.querySelector('.login-screen')) closeSuite(false);
   const shellRoleText=document.querySelector('.desk-sidebar')?.textContent||'';
   const restrictedDepartmentShell=/Responsabile (Interior|Concept|Visual) Department/.test(shellRoleText);
-  if(['resource','material_manager','reception','interior_head','concept_head','visual_head'].includes(effectiveShellProfile())||restrictedDepartmentShell){
+  if(['resource','material_manager','reception','interior_head','concept_head','visual_head','hr_manager'].includes(effectiveShellProfile())||restrictedDepartmentShell){
     document.querySelector('.aps-desktop-launcher')?.remove();
     document.querySelector('.aps-desktop-subnav')?.remove();
     document.querySelector('.aps-mobile-launcher')?.remove();
