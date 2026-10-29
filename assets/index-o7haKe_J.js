@@ -8999,7 +8999,7 @@ var lc = cu.exports,
   dp,
   wd = lc;
 (dp = wd.createRoot), wd.hydrateRoot;
-const xa = "0.14.2",
+const xa = "0.14.4",
   te = ({ children: t, size: n = 22 }) =>
     e.jsx("svg", {
       width: n,
@@ -9818,6 +9818,7 @@ const Xt = {
     interior_head: "Responsabile Interior Department",
     concept_head: "Responsabile Concept Department",
     visual_head: "Responsabile Visual Department",
+    hr_manager: "HR Manager",
   },
   Vn = [
     {
@@ -9852,6 +9853,15 @@ const Xt = {
       ruolo: "membro",
       appRole: "architect",
       materialLibraryManager: !0,
+    },
+    {
+      id: "epietrelli",
+      nome: "Elisabetta Pietrelli",
+      email: "elisabetta.pietrelli@archea.it",
+      demoPassword: "demo",
+      ruolo: "responsabile",
+      appRole: "hr_manager",
+      virtual: !0,
     },
     {
       id: "property",
@@ -28167,6 +28177,7 @@ function _v() {
   const A = ["senior_architect", "partner_architect"].includes(n.appRole),
     w = n.appRole === "property",
     Reception = n.appRole === "reception",
+    HRManager = n.appRole === "hr_manager",
     DepartmentHead = ["interior_head", "concept_head", "visual_head"].includes(n.appRole),
     DeptType = departmentTypeForViewer(n),
     B = [
@@ -28278,9 +28289,21 @@ function _v() {
       [DeptType, DepartmentMeta[DeptType].title, DepartmentStudioIcon, "Prenotazioni, assegnazioni e consegne"],
       ["departmentmanager", "Project Manager", Ss, `Gestione progetti e organico ${DepartmentMeta[DeptType].accent}`],
     ] : [],
-    M = Reception ? ReceptionCatalog : DepartmentHead ? DepartmentCatalog : w ? X : D,
+    HRCatalog = [
+      ["oggi", "Oggi", bx, "Agenda, richieste e attività HR"],
+      ["chat", "Chat", Td, "Messaggi interni dello studio"],
+      ["calendario", "Calendario", Wt, "Colloqui e appuntamenti"],
+      ["bio", "Organico", Xn, "Persone, ruoli e contratti"],
+      ["ore", "Ore", Ur, "Registrazione e analisi ore"],
+      ["insight", "Insight", io, "Indicatori HR e organizzativi"],
+      ["inarchea", "IN ARCHEA", va, "Report, eventi e sondaggi"],
+      ["prenota", "Prenotazioni", Wt, "Sale, auto e attrezzature"],
+    ],
+    M = Reception ? ReceptionCatalog : HRManager ? HRCatalog : DepartmentHead ? DepartmentCatalog : w ? X : D,
     q = Reception
       ? ["oggi", "pacchi", "calendario", "chat"]
+      : HRManager
+      ? ["oggi", "chat", "calendario", "bio", "ore", "insight"]
       : DepartmentHead
       ? ["oggi", "progetti", "calendario", "ore", "chat", "note"]
       : w
@@ -28780,6 +28803,15 @@ const $v = [
     ["ore", "hours", Ur],
     ["calendario", "calendar", Wt],
     ["altro", "more", dc],
+  ],
+  HRMobile = [
+    ["oggi", "today", Wt],
+    ["chat", "chat", Td],
+    ["calendario", "calendar", Wt],
+    ["bio", "employeeBio", Xn],
+    ["ore", "hours", Ur],
+    ["insight", "insights", xp],
+    ["altro", "more", dc],
   ];
 function Vv() {
   const {
@@ -28801,12 +28833,17 @@ function Vv() {
     ),
     j = (n == null ? void 0 : n.appRole) === "architect",
     Reception = (n == null ? void 0 : n.appRole) === "reception",
+    HRManager = (n == null ? void 0 : n.appRole) === "hr_manager",
     DepartmentHead = ["interior_head", "concept_head", "visual_head"].includes(n == null ? void 0 : n.appRole),
     DeptType = departmentTypeForViewer(n),
     f = ["avanzamento", "contabilita", "insight", "calendario", "bio"],
     g = ["avanzamento", "bio"],
     b = Reception
       ? ["oggi", "pacchi", "calendario", "prenota", "fornitori", "materioteca"].includes(s)
+        ? s
+        : "oggi"
+      : HRManager
+      ? ["oggi", "chat", "calendario", "bio", "ore", "insight", "inarchea", "prenota"].includes(s)
         ? s
         : "oggi"
       : DepartmentHead
@@ -28821,9 +28858,11 @@ function Vv() {
           g.includes(s)
         ? "oggi"
         : s,
-    v = Reception ? ReceptionMobile : DepartmentHead ? DepartmentMobile : m ? Uv : x ? Fv : Lv,
+    v = Reception ? ReceptionMobile : HRManager ? HRMobile : DepartmentHead ? DepartmentMobile : m ? Uv : x ? Fv : Lv,
     h = Reception
       ? ["prenota", "fornitori", "materioteca"]
+      : HRManager
+      ? ["inarchea", "prenota"]
       : DepartmentHead
       ? ["note", DeptType, "departmentmanager", "inarchea"]
       : x

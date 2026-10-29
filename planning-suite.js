@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'archea-planning-suite-v3';
-const VERSION = '0.14.3';
+const VERSION = '0.14.4';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 
@@ -193,7 +193,7 @@ let previousBaseNavButton = null;
 const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 const checkpoint = () => { undoStack.push(JSON.stringify(state)); if (undoStack.length > 20) undoStack.shift(); };
 const undo = () => { if (!undoStack.length) return toast('Nessuna modifica da annullare'); state = JSON.parse(undoStack.pop()); save(); render(); toast('Ultima modifica annullata'); };
-const profile = () => sessionStorage.getItem(PROFILE_KEY) || ({ fdiamanti:'platform_owner', abotrini:'project_manager', lleyra:'resource', property:'finance_direction' }[sessionStorage.getItem('archea-demo-user')] || 'platform_owner');
+const profile = () => sessionStorage.getItem(PROFILE_KEY) || ({ fdiamanti:'platform_owner', abotrini:'project_manager', lleyra:'resource', property:'finance_direction', alaurini:'reception', scardia:'interior_head', mgamberi:'concept_head', afrongia:'visual_head', mmadaghiele:'material_manager', epietrelli:'hr_manager' }[sessionStorage.getItem('archea-demo-user')] || 'platform_owner');
 const profileInfo = () => PLATFORM_PROFILES[profile()] || PLATFORM_PROFILES.platform_owner;
 const can = action => ({
   viewAllProjects:['resource_manager','pmo_admin','finance_direction','platform_owner'],
@@ -795,7 +795,7 @@ function injectDemoAccounts(){
 }
 function effectiveShellProfile(){
   const signedIn=sessionStorage.getItem('archea-demo-user');
-  return sessionStorage.getItem(PROFILE_KEY)||({fdiamanti:'platform_owner',abotrini:'project_manager',lleyra:'resource',property:'finance_direction',alaurini:'reception',scardia:'interior_head',mgamberi:'concept_head',afrongia:'visual_head',mmadaghiele:'material_manager'}[signedIn])||profile();
+  return sessionStorage.getItem(PROFILE_KEY)||({fdiamanti:'platform_owner',abotrini:'project_manager',lleyra:'resource',property:'finance_direction',alaurini:'reception',scardia:'interior_head',mgamberi:'concept_head',afrongia:'visual_head',mmadaghiele:'material_manager',epietrelli:'hr_manager'}[signedIn])||profile();
 }
 function applyShellPermissions(){
   const effectiveProfile=effectiveShellProfile();
@@ -813,7 +813,10 @@ function applyRuntimePolish(){
   document.querySelectorAll('.desk-footer,.foot,.dev-release,.dev-system-info').forEach(container=>{
     const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT);
     let node;
-    while((node=walker.nextNode())) if(node.nodeValue.includes('0.12.1')) node.nodeValue=node.nodeValue.replaceAll('0.12.1',VERSION);
+    while((node=walker.nextNode())){
+      if(node.nodeValue.includes('0.12.1')) node.nodeValue=node.nodeValue.replaceAll('0.12.1',VERSION);
+      if(node.nodeValue.includes('0.14.2')) node.nodeValue=node.nodeValue.replaceAll('0.14.2',VERSION);
+    }
   });
   const icons={
     validata:'<path d="m4 12 4 4L20 6"/>',
