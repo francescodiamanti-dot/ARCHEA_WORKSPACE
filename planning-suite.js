@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'archea-planning-suite-v3';
-const VERSION = '0.14.4';
+const VERSION = '0.14.5';
 const PROFILE_KEY = 'archea-platform-profile';
 const PROFILE_NAME_KEY = 'archea-platform-name';
 

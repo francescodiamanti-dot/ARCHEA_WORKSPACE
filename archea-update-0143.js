@@ -1,4 +1,4 @@
-const V='0.14.4',CAL='archea-calendar-v0144',CAL_DELETED='archea-calendar-deleted-v0144',NOTES='archea-notes-v0144',BOOK='archea-bookings-v0144';
+const V='0.14.5',CAL='archea-calendar-v0144',CAL_DELETED='archea-calendar-deleted-v0144',NOTES='archea-notes-v0144',BOOK='archea-bookings-v0144';
 const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)],esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const profile=()=>sessionStorage.getItem('archea-platform-profile')||document.documentElement.dataset.apsProfile||({fdiamanti:'platform_owner',abotrini:'project_manager',lleyra:'resource',property:'finance_direction',alaurini:'reception',scardia:'interior_head',mgamberi:'concept_head',afrongia:'visual_head',mmadaghiele:'material_manager',epietrelli:'hr_manager'}[sessionStorage.getItem('archea-demo-user')]||'platform_owner');
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());

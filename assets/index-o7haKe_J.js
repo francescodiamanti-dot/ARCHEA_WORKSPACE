@@ -8999,7 +8999,7 @@ var lc = cu.exports,
   dp,
   wd = lc;
 (dp = wd.createRoot), wd.hydrateRoot;
-const xa = "0.14.4",
+const xa = "0.14.5",
   te = ({ children: t, size: n = 22 }) =>
     e.jsx("svg", {
       width: n,
